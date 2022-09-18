@@ -22,11 +22,16 @@ public class User {
     @Column(name = "age", nullable = false)
     private byte age;
 
-    public User(String name, String email, String password, byte age) {
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "refresh_token_id", referencedColumnName = "id")
+    private RefreshToken refreshToken;
+
+    public User(String name, String email, String password, byte age, RefreshToken refreshToken) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.age = age;
+        this.refreshToken = refreshToken;
     }
 
     public User() {
@@ -70,5 +75,13 @@ public class User {
 
     public void setAge(byte age) {
         this.age = age;
+    }
+
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

@@ -10,7 +10,7 @@ public class UserDTO {
 
 
     public User convertToUser(){
-        return new User(name, email, password, age);
+        return new User(name, email, password, age, null);
     }
 
     public String getName() {

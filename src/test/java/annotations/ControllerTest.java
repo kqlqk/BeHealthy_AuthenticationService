@@ -1,6 +1,7 @@
 package annotations;
 
 import me.kqlqk.behealthy.authenticationservice.AuthenticationServiceApplication;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -13,8 +14,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 
-@SpringBootTest(classes = AuthenticationServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes = AuthenticationServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @TestPropertySource("/test_application.properties")
 @Sql(value = {"/create_tables.sql", "/add_data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public @interface RepositoryTest {
+@AutoConfigureMockMvc
+public @interface ControllerTest {
 }

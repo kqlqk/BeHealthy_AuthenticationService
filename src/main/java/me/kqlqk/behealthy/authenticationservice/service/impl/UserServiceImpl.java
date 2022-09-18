@@ -39,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void create(String name, String email, String password, byte age) {
+        if (existsByEmail(email)) {
+            throw new UserAlreadyExistsException("User with email = " + email + " already exists");
+        }
         if (name == null || name.equals("")) {
             throw new IllegalArgumentException("Name cannot be null");
         }
@@ -51,11 +54,8 @@ public class UserServiceImpl implements UserService {
         if (age <= 0) {
             throw new IllegalArgumentException("Name cannot be less than 1");
         }
-        if (existsByEmail(email)) {
-            throw new UserAlreadyExistsException("User with email = " + email + " already exists");
-        }
 
-        User user = new User(name, email, password, age);
+        User user = new User(name, email, password, age, null);
         userRepository.save(user);
     }
 
@@ -86,5 +86,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-
+    @Override
+    public boolean isValid(User user) {
+        return user != null &&
+                existsById(user.getId()) &&
+                (user.getName() != null || !user.getName().equals("")) &&
+                (user.getEmail() != null || !user.getEmail().equals("")) &&
+                (user.getPassword() != null || !user.getPassword().equals("")) &&
+                user.getAge() > 0;
+    }
 }

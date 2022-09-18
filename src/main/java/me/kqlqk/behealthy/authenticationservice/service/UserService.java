@@ -11,4 +11,6 @@ public interface UserService {
     boolean existsByEmail(String email);
     void create(String name, String email, String password, byte age);
     void update(long id, String name, String email, String password, byte age);
+
+    boolean isValid(User user);
 }
