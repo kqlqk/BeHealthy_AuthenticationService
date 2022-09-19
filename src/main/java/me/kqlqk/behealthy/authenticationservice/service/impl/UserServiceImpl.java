@@ -1,7 +1,7 @@
 package me.kqlqk.behealthy.authenticationservice.service.impl;
 
-import me.kqlqk.behealthy.authenticationservice.exceptions.UserAlreadyExistsException;
-import me.kqlqk.behealthy.authenticationservice.exceptions.UserNotFoundException;
+import me.kqlqk.behealthy.authenticationservice.exception.UserAlreadyExistsException;
+import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.repository.UserRepository;
 import me.kqlqk.behealthy.authenticationservice.service.UserService;

@@ -1,7 +1,7 @@
 package me.kqlqk.behealthy.authenticationservice.controller.rest.v1;
 
-import me.kqlqk.behealthy.authenticationservice.dto.TokensDTO;
 import me.kqlqk.behealthy.authenticationservice.dto.UserDTO;
+import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.service.TokenService;
@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +34,13 @@ public class UserRestController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO) {
         userService.create(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword(), userDTO.getAge());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody @Valid UserDTO userDTO) {
         userService.update(id, userDTO.getName(), userDTO.getName(), userDTO.getPassword(), userDTO.getAge());
         return ResponseEntity.ok().build();
     }
@@ -46,9 +48,13 @@ public class UserRestController {
     @GetMapping("/users/{id}/new_access_token")
     public Map<String, String> getAccessToken(@PathVariable long id) {
         User user = userService.getById(id);
-        String accessToken = tokenService.createAccessToken(user.getEmail());
+
+        if (user == null) {
+            throw new UserNotFoundException("User with id = " + id + " not found");
+        }
 
         Map<String, String> res = new HashMap<>();
+        String accessToken = tokenService.createAccessToken(user.getEmail());
         res.put("access", accessToken);
 
         return res;
@@ -57,9 +63,13 @@ public class UserRestController {
     @GetMapping("/users/{id}/new_refresh_token")
     public Map<String, String> getRefreshToken(@PathVariable long id) {
         User user = userService.getById(id);
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken(user.getEmail());
+
+        if (user == null) {
+            throw new UserNotFoundException("User with id = " + id + " not found");
+        }
 
         Map<String, String> res = new HashMap<>();
+        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken(user.getEmail());
         res.put("refresh", refreshToken.getToken());
 
         return res;
@@ -72,18 +82,22 @@ public class UserRestController {
         return tokenService.updateAccessAndRefreshToken(user);
     }
 
-    @PostMapping("/auth/validate_access_token")
-    public ResponseEntity<?> validateAccessToken(@RequestBody TokensDTO tokensDTO) {
-        if (tokenService.isAccessTokenValid(tokensDTO.getAccessToken())) {
+    @GetMapping("/auth/validate_access_token")
+    public ResponseEntity<?> validateAccessToken(HttpServletRequest request) {
+        String token = tokenService.getAccessTokenFromHeader(request);
+
+        if (tokenService.isAccessTokenValid(token)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-    @PostMapping("/auth/validate_refresh_token")
-    public ResponseEntity<?> validateRefreshToken(@RequestBody TokensDTO tokensDTO) {
-        if (tokenService.isRefreshTokenValid(tokensDTO.getRefreshToken())) {
+    @GetMapping("/auth/validate_refresh_token")
+    public ResponseEntity<?> validateRefreshToken(HttpServletRequest request) {
+        String token = tokenService.getRefreshTokenFromHeader(request);
+
+        if (tokenService.isRefreshTokenValid(token)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

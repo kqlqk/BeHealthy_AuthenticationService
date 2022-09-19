@@ -1,8 +1,8 @@
 package me.kqlqk.behealthy.authenticationservice.service.impl;
 
 import io.jsonwebtoken.*;
-import me.kqlqk.behealthy.authenticationservice.exceptions.TokenException;
-import me.kqlqk.behealthy.authenticationservice.exceptions.UserNotFoundException;
+import me.kqlqk.behealthy.authenticationservice.exception.TokenException;
+import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.repository.RefreshTokenRepository;
@@ -135,6 +135,9 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Map<String, String> updateAccessAndRefreshToken(User user) {
+        if (!userService.isValid(user)) {
+            throw new UserNotFoundException("User not found");
+        }
         Map<String, String> tokens = new HashMap<>();
 
         RefreshToken refreshToken = createAndSaveRefreshToken(user.getEmail());
