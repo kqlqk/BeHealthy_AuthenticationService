@@ -1,6 +1,9 @@
 package me.kqlqk.behealthy.authenticationservice.exception;
 
 import me.kqlqk.behealthy.authenticationservice.dto.ExceptionDTO;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.TokenException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserAlreadyExistsException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

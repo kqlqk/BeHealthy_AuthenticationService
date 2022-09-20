@@ -1,8 +1,8 @@
 package me.kqlqk.behealthy.authenticationservice.service.impl;
 
 import io.jsonwebtoken.*;
-import me.kqlqk.behealthy.authenticationservice.exception.TokenException;
-import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.TokenException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.repository.RefreshTokenRepository;

@@ -1,12 +1,14 @@
 package me.kqlqk.behealthy.authenticationservice.service.impl;
 
-import me.kqlqk.behealthy.authenticationservice.exception.UserAlreadyExistsException;
-import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserAlreadyExistsException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.repository.UserRepository;
 import me.kqlqk.behealthy.authenticationservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -25,6 +27,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userRepository.findAll();
     }
 
     @Override

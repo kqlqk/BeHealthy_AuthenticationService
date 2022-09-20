@@ -1,9 +1,13 @@
 package me.kqlqk.behealthy.authenticationservice.dto;
 
+import me.kqlqk.behealthy.authenticationservice.model.User;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDTO {
     @Pattern(regexp = "[a-zA-z]*", message = "Name should contains only letters")
@@ -29,6 +33,17 @@ public class UserDTO {
         this.email = email;
         this.password = password;
         this.age = age;
+    }
+
+    public static List<UserDTO> convertListOfUsersToListOfUserDTOs(List<User> users) {
+        List<UserDTO> userDTOs = new ArrayList<>();
+
+        for (User user : users) {
+            UserDTO userDTO = new UserDTO(user.getName(), user.getEmail(), user.getPassword(), user.getAge());
+            userDTOs.add(userDTO);
+        }
+
+        return userDTOs;
     }
 
     public String getName() {

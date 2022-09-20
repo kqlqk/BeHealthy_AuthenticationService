@@ -237,6 +237,15 @@ public class UserRestControllerTest {
     }
 
     @Test
+    public void getAllUsers_shouldReturnAllUsers() throws Exception {
+        mockMvc.perform(get("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.size()", is(2)));
+    }
+
+    @Test
     public void getAccessToken_shouldGetAccessToken() throws Exception {
         mockMvc.perform(get("/api/v1/users/1/new_access_token")
                         .contentType(MediaType.APPLICATION_JSON))

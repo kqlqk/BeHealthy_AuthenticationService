@@ -1,7 +1,7 @@
 package me.kqlqk.behealthy.authenticationservice.controller.rest.v1;
 
 import me.kqlqk.behealthy.authenticationservice.dto.UserDTO;
-import me.kqlqk.behealthy.authenticationservice.exception.UserNotFoundException;
+import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.service.TokenService;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,6 +44,11 @@ public class UserRestController {
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody @Valid UserDTO userDTO) {
         userService.update(id, userDTO.getName(), userDTO.getName(), userDTO.getPassword(), userDTO.getAge());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users")
+    public List<UserDTO> getAllUsers() {
+        return UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll());
     }
 
     @GetMapping("/users/{id}/new_access_token")
