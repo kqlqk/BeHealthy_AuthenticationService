@@ -1,13 +1,13 @@
 package me.kqlqk.behealthy.authenticationservice.controller.rest.v1;
 
 import me.kqlqk.behealthy.authenticationservice.dto.UserDTO;
+import me.kqlqk.behealthy.authenticationservice.dto.ValidateDTO;
 import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.service.TokenService;
 import me.kqlqk.behealthy.authenticationservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,25 +89,58 @@ public class UserRestController {
     }
 
     @GetMapping("/auth/validate_access_token")
-    public ResponseEntity<?> validateAccessToken(HttpServletRequest request) {
+    public ValidateDTO validateAccessToken(HttpServletRequest request) {
         String token = tokenService.getAccessTokenFromHeader(request);
 
-        if (tokenService.isAccessTokenValid(token)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        ValidateDTO validateDTO = new ValidateDTO();
+        validateDTO.setValid(tokenService.isAccessTokenValid(token));
+
+        return validateDTO;
     }
 
     @GetMapping("/auth/validate_refresh_token")
-    public ResponseEntity<?> validateRefreshToken(HttpServletRequest request) {
+    public ValidateDTO validateRefreshToken(HttpServletRequest request) {
         String token = tokenService.getRefreshTokenFromHeader(request);
 
-        if (tokenService.isRefreshTokenValid(token)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        ValidateDTO validateDTO = new ValidateDTO();
+        validateDTO.setValid(tokenService.isRefreshTokenValid(token));
+
+        return validateDTO;
     }
 
+    @GetMapping("/auth/get_access_token")
+    public Map<String, String> getAccessTokenFromRequest(HttpServletRequest request) {
+        Map<String, String> token = new HashMap<>();
+
+        token.put("access", tokenService.getAccessTokenFromHeader(request));
+
+        return token;
+    }
+
+    @GetMapping("/auth/get_refresh_token")
+    public Map<String, String> getRefreshTokenFromRequest(HttpServletRequest request) {
+        Map<String, String> token = new HashMap<>();
+
+        token.put("refresh", tokenService.getRefreshTokenFromHeader(request));
+
+        return token;
+    }
+
+    @GetMapping("/auth/get_email_from_access_token")
+    public Map<String, String> getEmailFromAccessToken(HttpServletRequest request) {
+        Map<String, String> token = new HashMap<>();
+
+        token.put("email", tokenService.getEmailByAccessToken(tokenService.getAccessTokenFromHeader(request)));
+
+        return token;
+    }
+
+    @GetMapping("/auth/get_email_from_refresh_token")
+    public Map<String, String> getEmailFromRefreshToken(HttpServletRequest request) {
+        Map<String, String> token = new HashMap<>();
+
+        token.put("email", tokenService.getEmailByRefreshToken(tokenService.getRefreshTokenFromHeader(request)));
+
+        return token;
+    }
 }

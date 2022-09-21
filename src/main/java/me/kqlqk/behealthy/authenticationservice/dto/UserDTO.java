@@ -2,33 +2,21 @@ package me.kqlqk.behealthy.authenticationservice.dto;
 
 import me.kqlqk.behealthy.authenticationservice.model.User;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDTO {
-    @Pattern(regexp = "[a-zA-z]*", message = "Name should contains only letters")
-    @Size(min = 2, max = 20, message = "Name should be between 2 and 20 letters")
+    private long id;
     private String name;
-
-    @Pattern(regexp = "^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$", message = "Email should be valid")
     private String email;
-
-    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,50}$",
-            message = "Password must be between 8 and 50 characters, at least: 1 number, 1 uppercase letter, 1 lowercase letter")
     private String password;
-
-    @Min(value = 3, message = "Age should be between 3 and 120")
-    @Max(value = 120, message = "Age should be between 3 and 120")
     private byte age;
 
     public UserDTO() {
     }
 
-    public UserDTO(String name, String email, String password, byte age) {
+    public UserDTO(long id, String name, String email, String password, byte age) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -39,11 +27,19 @@ public class UserDTO {
         List<UserDTO> userDTOs = new ArrayList<>();
 
         for (User user : users) {
-            UserDTO userDTO = new UserDTO(user.getName(), user.getEmail(), user.getPassword(), user.getAge());
+            UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPassword(), user.getAge());
             userDTOs.add(userDTO);
         }
 
         return userDTOs;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {
