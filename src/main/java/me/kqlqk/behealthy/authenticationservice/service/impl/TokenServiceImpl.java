@@ -6,6 +6,7 @@ import me.kqlqk.behealthy.authenticationservice.exception.exceptions.UserNotFoun
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
 import me.kqlqk.behealthy.authenticationservice.repository.RefreshTokenRepository;
+import me.kqlqk.behealthy.authenticationservice.repository.UserRepository;
 import me.kqlqk.behealthy.authenticationservice.service.TokenService;
 import me.kqlqk.behealthy.authenticationservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,19 @@ public class TokenServiceImpl implements TokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
 
     @Autowired
-    public TokenServiceImpl(RefreshTokenRepository refreshTokenRepository, UserService userService) {
+    public TokenServiceImpl(RefreshTokenRepository refreshTokenRepository, UserService userService, UserRepository userRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public RefreshToken getRefreshTokenById(long id) {
+        return refreshTokenRepository.findById(id);
     }
 
     @Override
@@ -66,14 +74,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public RefreshToken createAndSaveRefreshToken(String email) {
+    public RefreshToken createRefreshToken(String email) {
         if (!userService.isValid(userService.getByEmail(email))) {
             throw new UserNotFoundException("User with email = " + email + " not found");
         }
 
+        User user = userService.getByEmail(email);
+
         RefreshToken refreshToken = new RefreshToken();
 
-        Claims claims = Jwts.claims().setSubject(email);
+        Claims claims = Jwts.claims().setSubject(user.getEmail());
 
         Date current = new Date();
         Date validity = new Date(current.getTime() + refreshTokenValidityMilliseconds);
@@ -87,8 +97,11 @@ public class TokenServiceImpl implements TokenService {
 
         refreshToken.setToken(token);
         refreshToken.setExpires(validity.getTime());
+        user.setRefreshToken(refreshToken);
 
-        return refreshToken;
+        userRepository.save(user);
+
+        return getRefreshTokenByStringToken(token);
     }
 
     @Override
@@ -126,6 +139,10 @@ public class TokenServiceImpl implements TokenService {
             if (!userService.isValid(userService.getByEmail(email))) {
                 return false;
             }
+
+            if (!userService.getByEmail(email).getRefreshToken().getToken().equals(token)) {
+                return false;
+            }
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
@@ -134,16 +151,51 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Map<String, String> updateAccessAndRefreshToken(User user) {
-        if (!userService.isValid(user)) {
-            throw new UserNotFoundException("User not found");
+    public RefreshToken updateRefreshToken(String email) {
+        if (!userService.isValid(userService.getByEmail(email))) {
+            throw new UserNotFoundException("User with email = " + email + " not found");
         }
-        Map<String, String> tokens = new HashMap<>();
 
-        RefreshToken refreshToken = createAndSaveRefreshToken(user.getEmail());
+        User user = userService.getByEmail(email);
+
+        if (user.getRefreshToken() == null) {
+            throw new TokenException("User with email = " + user.getEmail() + " hasn't a refresh token");
+        }
+
+        RefreshToken refreshToken = user.getRefreshToken();
+
+        Claims claims = Jwts.claims().setSubject(user.getEmail());
+
+        Date current = new Date();
+        Date validity = new Date(current.getTime() + refreshTokenValidityMilliseconds);
+
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(current)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, refreshTokenSecret)
+                .compact();
+
+        refreshToken.setToken(token);
+        refreshToken.setExpires(validity.getTime());
         user.setRefreshToken(refreshToken);
 
+        userRepository.save(user);
+
+        return refreshToken;
+    }
+
+    @Override
+    public Map<String, String> updateAccessAndRefreshToken(String email) {
+        if (!userService.isValid(userService.getByEmail(email))) {
+            throw new UserNotFoundException("User not found");
+        }
+
+        User user = userService.getByEmail(email);
+
+        Map<String, String> tokens = new HashMap<>();
         String accessToken = createAccessToken(user.getEmail());
+        RefreshToken refreshToken = updateRefreshToken(user.getEmail());
 
         tokens.put("access", accessToken);
         tokens.put("refresh", refreshToken.getToken());

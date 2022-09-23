@@ -31,9 +31,14 @@ public class TokenServiceImplTest {
 
     @Test
     public void createAndSaveRefreshToken_shouldCreateRefreshTokenAndSaveItInDb() {
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken("john@mail.com");
+        userService.create("Steve", "steve@mail.com", "randomPswd", (byte) 19);
 
-        assertThat(refreshToken).isNotNull();
+        RefreshToken refreshToken = tokenService.createRefreshToken("steve@mail.com");
+
+        User user = userService.getByEmail("steve@mail.com");
+
+        assertThat(user.getRefreshToken()).isNotNull();
+        assertThat(user.getRefreshToken().getId()).isEqualTo(refreshToken.getId());
     }
 
     @Test
@@ -41,28 +46,39 @@ public class TokenServiceImplTest {
         String accessToken = tokenService.createAccessToken("john@mail.com");
 
         assertThat(tokenService.isAccessTokenValid(accessToken)).isTrue();
-
         assertThat(tokenService.isAccessTokenValid(null)).isFalse();
-
     }
 
     @Test
     public void isRefreshTokenValid_shouldCheckIsRefreshTokenValid() {
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken("john@mail.com");
+        RefreshToken refreshToken = tokenService.createRefreshToken("john@mail.com");
 
         assertThat(tokenService.isRefreshTokenValid(refreshToken.getToken())).isTrue();
-
         assertThat(tokenService.isRefreshTokenValid(null)).isFalse();
     }
 
     @Test
-    public void updateAccessAndRefreshToken_shouldUpdateAccessAndRefreshToken() {
-        User user = userService.getById(1);
+    public void updateRefreshToken_ShouldUpdateRefreshToken() {
+        String oldRefreshToken = userService.getById(1).getRefreshToken().getToken();
 
-        Map<String, String> tokens = tokenService.updateAccessAndRefreshToken(user);
+        tokenService.updateRefreshToken(userService.getById(1).getEmail());
+
+        String newToken = userService.getById(1).getRefreshToken().getToken();
+
+        assertThat(newToken).isNotEqualTo(oldRefreshToken);
+    }
+
+    @Test
+    public void updateAccessAndRefreshToken_shouldUpdateAccessAndRefreshToken() {
+        String oldRefreshToken = userService.getById(1).getRefreshToken().getToken();
+
+        Map<String, String> tokens = tokenService.updateAccessAndRefreshToken(userService.getById(1).getEmail());
+
+        String newToken = userService.getById(1).getRefreshToken().getToken();
 
         assertThat(tokens.get("access")).isNotNull();
         assertThat(tokens.get("refresh")).isNotNull();
+        assertThat(newToken).isNotEqualTo(oldRefreshToken);
     }
 
     @Test
@@ -74,7 +90,7 @@ public class TokenServiceImplTest {
 
     @Test
     public void getEmailByRefreshToken_shouldGetEmailByRefreshToken() {
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken("john@mail.com");
+        RefreshToken refreshToken = tokenService.createRefreshToken("john@mail.com");
 
         assertThat(tokenService.getEmailByRefreshToken(refreshToken.getToken())).isEqualTo("john@mail.com");
     }

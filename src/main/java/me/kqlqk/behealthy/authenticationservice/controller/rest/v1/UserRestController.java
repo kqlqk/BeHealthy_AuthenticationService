@@ -75,7 +75,7 @@ public class UserRestController {
         }
 
         Map<String, String> res = new HashMap<>();
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken(user.getEmail());
+        RefreshToken refreshToken = tokenService.createRefreshToken(user.getEmail());
         res.put("refresh", refreshToken.getToken());
 
         return res;
@@ -84,8 +84,11 @@ public class UserRestController {
     @GetMapping("/users/{id}/update_tokens")
     public Map<String, String> updateTokens(@PathVariable long id) {
         User user = userService.getById(id);
+        if (user == null) {
+            throw new UserNotFoundException("User with id = " + id + " not found");
+        }
 
-        return tokenService.updateAccessAndRefreshToken(user);
+        return tokenService.updateAccessAndRefreshToken(user.getEmail());
     }
 
     @GetMapping("/auth/validate_access_token")

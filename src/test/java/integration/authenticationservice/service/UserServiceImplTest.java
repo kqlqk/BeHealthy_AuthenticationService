@@ -3,6 +3,7 @@ package integration.authenticationservice.service;
 import annotations.ServiceTest;
 import me.kqlqk.behealthy.authenticationservice.model.RefreshToken;
 import me.kqlqk.behealthy.authenticationservice.model.User;
+import me.kqlqk.behealthy.authenticationservice.service.impl.TokenServiceImpl;
 import me.kqlqk.behealthy.authenticationservice.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserServiceImplTest {
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private TokenServiceImpl tokenService;
 
     @Test
     public void create_shouldCreateUserAndAddToDb() {

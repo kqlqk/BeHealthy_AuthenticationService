@@ -59,77 +59,6 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Required request body is missing")));
-
-
-        UserDTO userDTO = new UserDTO(1L, "  ", "stee@mail.com", "randomPSWD1", (byte) 19);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Name should contains only letters")));
-
-
-        userDTO = new UserDTO(1L, "a", "steve@mail.com", "randomPSWD1", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Name should be between 2 and 20 letters")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "badMail.com", "randomPSWD1", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Email should be valid")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "steve@mail.com", "random", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info",
-                        is("Password must be between 8 and 50 characters, at least: 1 number, 1 uppercase letter, 1 lowercase letter")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "steve@mail.com", "randomPSWD1", (byte) 1);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Age should be between 3 and 120")));
     }
 
     @Test
@@ -155,77 +84,6 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Required request body is missing")));
-
-
-        UserDTO userDTO = new UserDTO(1L, "  ", "stee@mail.com", "randomPSWD1", (byte) 19);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users/1")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Name should contains only letters")));
-
-
-        userDTO = new UserDTO(1L, "a", "steve@mail.com", "randomPSWD1", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users/1")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Name should be between 2 and 20 letters")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "badMail.com", "randomPSWD1", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users/1")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Email should be valid")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "steve@mail.com", "random", (byte) 19);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users/1")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info",
-                        is("Password must be between 8 and 50 characters, at least: 1 number, 1 uppercase letter, 1 lowercase letter")));
-
-
-        userDTO = new UserDTO(1L, "Steve", "steve@mail.com", "randomPSWD1", (byte) 1);
-        objectMapper = new ObjectMapper();
-        jsonUserDTO = objectMapper.writeValueAsString(userDTO);
-
-        mockMvc.perform(post("/api/v1/users/1")
-                        .content(jsonUserDTO)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Age should be between 3 and 120")));
     }
 
     @Test
@@ -298,7 +156,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("User not found")));
+                .andExpect(jsonPath("$.info", is("User with id = 99 not found")));
     }
 
     @Test
@@ -349,7 +207,7 @@ public class UserRestControllerTest {
 
     @Test
     public void validateRefreshToken_shouldValidateRefreshToken() throws Exception {
-        RefreshToken refreshToken = tokenService.createAndSaveRefreshToken("john@mail.com");
+        RefreshToken refreshToken = tokenService.createRefreshToken("john@mail.com");
 
         mockMvc.perform(get("/api/v1/auth/validate_refresh_token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -427,7 +285,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getRefreshTokenFromRequest_shouldReturnRefreshTokenFromRequest() throws Exception {
-        RefreshToken token = tokenService.createAndSaveRefreshToken("john@mail.com");
+        RefreshToken token = tokenService.createRefreshToken("john@mail.com");
 
         mockMvc.perform(get("/api/v1/auth/get_refresh_token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -484,7 +342,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getEmailFromRefreshToken_shouldReturnEmailFromRefreshToken() throws Exception {
-        RefreshToken token = tokenService.createAndSaveRefreshToken("john@mail.com");
+        RefreshToken token = tokenService.createRefreshToken("john@mail.com");
 
         mockMvc.perform(get("/api/v1/auth/get_email_from_refresh_token")
                         .contentType(MediaType.APPLICATION_JSON)
