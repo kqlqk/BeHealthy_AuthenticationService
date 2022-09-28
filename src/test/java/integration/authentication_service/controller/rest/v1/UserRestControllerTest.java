@@ -26,7 +26,7 @@ public class UserRestControllerTest {
     private TokenServiceImpl tokenService;
 
     @Test
-    public void getUser_shouldReturnJsonWithUser() throws Exception {
+    public void getUserById_shouldReturnJsonWithUser() throws Exception {
         mockMvc.perform(get("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -87,12 +87,20 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getAllUsers_shouldReturnAllUsers() throws Exception {
+    public void getAllUsersOrSpecified_shouldReturnAllUsersOrSpecified() throws Exception {
         mockMvc.perform(get("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.size()", is(2)));
+
+        mockMvc.perform(get("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("email", "john@mail.com"))
+                .andDo(print())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.name").exists());
     }
 
     @Test

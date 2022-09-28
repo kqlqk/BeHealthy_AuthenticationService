@@ -25,11 +25,23 @@ public class UserDTO {
         List<UserDTO> userDTOs = new ArrayList<>();
 
         for (User user : users) {
-            UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPassword());
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setName(user.getName());
             userDTOs.add(userDTO);
         }
 
         return userDTOs;
+    }
+
+    public static UserDTO convertFromUserToUserDTO(User user) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setName(user.getName());
+
+        return userDTO;
     }
 
     public long getId() {

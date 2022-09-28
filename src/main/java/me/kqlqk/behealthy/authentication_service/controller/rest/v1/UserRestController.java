@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -29,8 +28,8 @@ public class UserRestController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUser(@PathVariable long id) {
-        return userService.getById(id);
+    public UserDTO getUserById(@PathVariable long id) {
+        return UserDTO.convertFromUserToUserDTO(userService.getById(id));
     }
 
     @PostMapping("/users")
@@ -46,8 +45,11 @@ public class UserRestController {
     }
 
     @GetMapping("/users")
-    public List<UserDTO> getAllUsers() {
-        return UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll());
+    public ResponseEntity<?> getAllUsersOrSpecified(@RequestParam(required = false) String email) {
+        if (email == null || email.equals("")) {
+            return ResponseEntity.ok(UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll()));
+        }
+        return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
     }
 
     @GetMapping("/users/{id}/new_access_token")
