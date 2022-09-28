@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <start-class>me.kqlqk.behealthy.authenticationservice.AuthenticationServiceApplication</start-class>
+        <start-class>me.kqlqk.behealthy.authentication_service.AuthenticationServiceApplication</start-class>
     </properties>
 
     <dependencies>

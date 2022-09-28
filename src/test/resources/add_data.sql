@@ -12,16 +12,14 @@ values ('eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhAbWFpbC5jb20iLCJpYXQiOjE2NjA0OTMzMT
         9663085313);
 
 
-insert into users (name, email, password, age, refresh_token_id)
+insert into users (name, email, password, refresh_token_id)
 values ('John',
         'john@mail.com',
         '$2a$12$Q3U77paoIJHMLrxxw.7bt.38f6gcvbSVbiznWoErlRyr.AhzS7/Hm',--john123
-        20,
         1);
 
-insert into users (name, email, password, age, refresh_token_id)
+insert into users (name, email, password, refresh_token_id)
 values ('Max',
         'max@gmail.com',
         '$2a$12$ieL1D9YHC0ZrdzeQHYDYV.E8f4wOAyPxlurRQ.B0KTzSKCGCxMU9.',--max123
-        43,
         2);

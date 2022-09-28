@@ -16,7 +16,6 @@ create table users
     name             varchar(100) not null,
     email            varchar(100) not null unique,
     password         varchar      not null,
-    age              smallint     not null,
     refresh_token_id bigint unique,
 
     primary key (id),
