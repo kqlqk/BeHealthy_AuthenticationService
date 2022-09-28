@@ -29,6 +29,7 @@ public class UserDTO {
             userDTO.setId(user.getId());
             userDTO.setEmail(user.getEmail());
             userDTO.setName(user.getName());
+            userDTO.setPassword(user.getPassword());
             userDTOs.add(userDTO);
         }
 
@@ -40,6 +41,7 @@ public class UserDTO {
         userDTO.setId(user.getId());
         userDTO.setEmail(user.getEmail());
         userDTO.setName(user.getName());
+        userDTO.setPassword(user.getPassword());
 
         return userDTO;
     }
