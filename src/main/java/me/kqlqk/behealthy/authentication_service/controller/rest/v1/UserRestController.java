@@ -40,7 +40,7 @@ public class UserRestController {
 
     @PostMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
-        userService.update(id, userDTO.getName(), userDTO.getName(), userDTO.getPassword());
+        userService.update(id, userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
         return ResponseEntity.ok().build();
     }
 
