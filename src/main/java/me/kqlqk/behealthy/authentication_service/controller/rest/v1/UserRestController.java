@@ -49,6 +49,11 @@ public class UserRestController {
         if (email == null || email.equals("")) {
             return ResponseEntity.ok(UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll()));
         }
+
+        if (!userService.existsByEmail(email)) {
+            throw new UserNotFoundException("User with email = " + email + " not found");
+        }
+
         return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
     }
 
