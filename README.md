@@ -12,6 +12,7 @@
 </div>
 
 ## About The Microservice
+
 Authentication service provides security for users
 
 <b>Devs:</b> <a href="https://github.com/kqlqk">Kqlqk</a> <br/>
