@@ -1,6 +1,7 @@
 package me.kqlqk.behealthy.authentication_service.service.impl;
 
 import io.jsonwebtoken.*;
+import lombok.NonNull;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
@@ -204,11 +205,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getEmailByAccessToken(String token) {
-        if (token == null || token.equals("")) {
-            throw new IllegalArgumentException("Access token cannot be null");
-        }
-
+    public String getEmailByAccessToken(@NonNull String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(accessTokenSecret).build().parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
@@ -217,11 +214,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getEmailByRefreshToken(String token) {
-        if (token == null || token.equals("")) {
-            throw new IllegalArgumentException("Refresh token cannot be null");
-        }
-
+    public String getEmailByRefreshToken(@NonNull String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(refreshTokenSecret).build().parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
@@ -230,11 +223,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getAccessTokenFromHeader(HttpServletRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("HttpServletRequest cannot be null");
-        }
-
+    public String getAccessTokenFromHeader(@NonNull HttpServletRequest request) {
         String bearerWithToken = request.getHeader("Authorization_access");
 
         if (bearerWithToken == null) {
@@ -248,11 +237,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getRefreshTokenFromHeader(HttpServletRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("HttpServletRequest cannot be null");
-        }
-
+    public String getRefreshTokenFromHeader(@NonNull HttpServletRequest request) {
         String bearerWithToken = request.getHeader("Authorization_refresh");
 
         if (bearerWithToken == null) {

@@ -1,5 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.service.impl;
 
+import lombok.NonNull;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserAlreadyExistsException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
@@ -45,18 +46,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void create(String name, String email, String password) {
+    public void create(@NonNull String name, @NonNull String email, @NonNull String password) {
         if (existsByEmail(email)) {
             throw new UserAlreadyExistsException("User with email = " + email + " already exists");
-        }
-        if (name == null || name.equals("")) {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        if (email == null || email.equals("")) {
-            throw new IllegalArgumentException("Email cannot be null");
-        }
-        if (password == null || password.equals("")) {
-            throw new IllegalArgumentException("Password cannot be null");
         }
 
         User user = new User(name, email, password, null);
@@ -64,18 +56,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void update(long id, String name, String email, String password) {
+    public void update(long id, @NonNull String name, @NonNull String email, @NonNull String password) {
         if (!existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
-        }
-        if (name == null || name.equals("")) {
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        if (email == null || email.equals("")) {
-            throw new IllegalArgumentException("Email cannot be null");
-        }
-        if (password == null || password.equals("")) {
-            throw new IllegalArgumentException("Password cannot be null");
         }
 
         User user = getById(id);
