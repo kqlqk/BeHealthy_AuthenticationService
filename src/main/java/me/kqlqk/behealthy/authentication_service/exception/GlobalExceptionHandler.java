@@ -17,7 +17,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, TokenException.class})
+    @ExceptionHandler({
+            UserAlreadyExistsException.class,
+            UserNotFoundException.class,
+            TokenException.class,
+            IllegalArgumentException.class,
+            NullPointerException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDTO handle(Exception e) {
         ExceptionDTO exceptionDTO = new ExceptionDTO();
