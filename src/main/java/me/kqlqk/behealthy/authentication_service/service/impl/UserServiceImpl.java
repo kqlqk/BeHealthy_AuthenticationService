@@ -7,6 +7,8 @@ import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,20 +53,44 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email = " + email + " already exists");
         }
 
-        User user = new User(name, email, password, null);
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        User user = new User(name, email, encoder.encode(password), null);
         userRepository.save(user);
     }
 
     @Override
-    public void update(long id, @NonNull String name, @NonNull String email, @NonNull String password) {
+    public void update(long id, String name, String email, String password) {
         if (!existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
         }
 
         User user = getById(id);
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
+
+        if (name != null && !name.equals("")) {
+            user.setName(name);
+        }
+
+        if (email != null && !email.equals("")) {
+            if (!email.matches("^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$")) {
+                throw new IllegalArgumentException("Email should be valid");
+            }
+            if (existsByEmail(email)) {
+                throw new IllegalArgumentException("User with email = " + email + " already exists");
+            }
+
+            user.setEmail(email);
+        }
+
+        if (password != null && !password.equals("")) {
+            PasswordEncoder encoder = new BCryptPasswordEncoder();
+            user.setPassword(encoder.encode(password));
+        }
+
+        if ((name == null || name.equals("")) &&
+                (email == null || email.equals("")) &&
+                (password == null || password.equals(""))) {
+            throw new IllegalArgumentException("Minimum 1 field should be updated");
+        }
 
         userRepository.save(user);
     }
