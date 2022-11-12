@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.kqlqk.behealthy.authentication_service.model.User;
 
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,10 @@ import java.util.List;
 public class UserDTO {
     private long id;
     private String name;
+
+    @Pattern(regexp = "^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$", message = "Email should be valid")
     private String email;
+
     private String password;
 
 

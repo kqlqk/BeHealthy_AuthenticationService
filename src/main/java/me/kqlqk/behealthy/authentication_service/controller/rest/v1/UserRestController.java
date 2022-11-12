@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,16 +30,20 @@ public class UserRestController {
 
     @GetMapping("/users/{id}")
     public UserDTO getUserById(@PathVariable long id) {
+        if (!userService.existsById(id)) {
+            throw new UserNotFoundException("User with id = " + id + " not found");
+        }
+
         return UserDTO.convertFromUserToUserDTO(userService.getById(id));
     }
 
     @PostMapping("/users")
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO) {
         userService.create(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/users/{id}")
+    @PatchMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
         userService.update(id, userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
         return ResponseEntity.ok().build();
@@ -57,7 +62,7 @@ public class UserRestController {
         return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
     }
 
-    @GetMapping("/users/{id}/new_access_token")
+    @PostMapping("/users/{id}/access")
     public Map<String, String> getAccessToken(@PathVariable long id) {
         User user = userService.getById(id);
 
@@ -72,7 +77,7 @@ public class UserRestController {
         return res;
     }
 
-    @GetMapping("/users/{id}/new_refresh_token")
+    @GetMapping("/users/{id}/refresh")
     public Map<String, String> getRefreshToken(@PathVariable long id) {
         User user = userService.getById(id);
 
@@ -87,7 +92,7 @@ public class UserRestController {
         return res;
     }
 
-    @GetMapping("/users/{id}/update_tokens")
+    @PutMapping("/users/{id}/tokens")
     public Map<String, String> updateTokens(@PathVariable long id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -97,7 +102,7 @@ public class UserRestController {
         return tokenService.updateAccessAndRefreshToken(user.getEmail());
     }
 
-    @GetMapping("/auth/validate_access_token")
+    @GetMapping("/auth/validate/access")
     public ValidateDTO validateAccessToken(HttpServletRequest request) {
         String token = tokenService.getAccessTokenFromHeader(request);
 
@@ -107,7 +112,7 @@ public class UserRestController {
         return validateDTO;
     }
 
-    @GetMapping("/auth/validate_refresh_token")
+    @GetMapping("/auth/validate/refresh")
     public ValidateDTO validateRefreshToken(HttpServletRequest request) {
         String token = tokenService.getRefreshTokenFromHeader(request);
 
@@ -117,7 +122,7 @@ public class UserRestController {
         return validateDTO;
     }
 
-    @GetMapping("/auth/get_access_token")
+    @GetMapping("/auth/request/access")
     public Map<String, String> getAccessTokenFromRequest(HttpServletRequest request) {
         Map<String, String> token = new HashMap<>();
 
@@ -126,7 +131,7 @@ public class UserRestController {
         return token;
     }
 
-    @GetMapping("/auth/get_refresh_token")
+    @GetMapping("/auth/request/refresh")
     public Map<String, String> getRefreshTokenFromRequest(HttpServletRequest request) {
         Map<String, String> token = new HashMap<>();
 
@@ -135,7 +140,7 @@ public class UserRestController {
         return token;
     }
 
-    @GetMapping("/auth/get_email_from_access_token")
+    @GetMapping("/auth/request/access/email")
     public Map<String, String> getEmailFromAccessToken(HttpServletRequest request) {
         Map<String, String> token = new HashMap<>();
 
@@ -144,7 +149,7 @@ public class UserRestController {
         return token;
     }
 
-    @GetMapping("/auth/get_email_from_refresh_token")
+    @GetMapping("/auth/request/refresh/email")
     public Map<String, String> getEmailFromRefreshToken(HttpServletRequest request) {
         Map<String, String> token = new HashMap<>();
 
