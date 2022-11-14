@@ -62,7 +62,7 @@ public class UserRestController {
         return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
     }
 
-    @PostMapping("/users/{id}/access")
+    @GetMapping("/users/{id}/access")
     public Map<String, String> getAccessToken(@PathVariable long id) {
         User user = userService.getById(id);
 
