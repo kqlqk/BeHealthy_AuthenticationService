@@ -9,6 +9,7 @@ import me.kqlqk.behealthy.authentication_service.service.TokenService;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,11 +22,13 @@ import java.util.Map;
 public class UserRestController {
     private final UserService userService;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserRestController(UserService userService, TokenService tokenService) {
+    public UserRestController(UserService userService, TokenService tokenService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/users/{id}")
@@ -43,7 +46,7 @@ public class UserRestController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/users/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
         userService.update(id, userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
         return ResponseEntity.ok().build();
@@ -62,8 +65,25 @@ public class UserRestController {
         return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
     }
 
-    @GetMapping("/users/{id}/access")
-    public Map<String, String> getAccessToken(@PathVariable long id) {
+    @PostMapping("/users/{id}/password/check")
+    public ResponseEntity<?> checkUserPassword(@PathVariable long id, @RequestBody String oldPassword) {
+        if (!userService.existsById(id)) {
+            throw new UserNotFoundException("User with id = " + id + " not found");
+        }
+
+        Map<String, Boolean> validation = new HashMap<>();
+
+        if (passwordEncoder.matches(oldPassword, getUserById(id).getPassword())) {
+            validation.put("valid", true);
+        } else {
+            validation.put("valid", false);
+        }
+
+        return ResponseEntity.ok(validation);
+    }
+
+    @PutMapping("/users/{id}/access")
+    public Map<String, String> getNewAccessToken(@PathVariable long id) {
         User user = userService.getById(id);
 
         if (user == null) {
@@ -77,8 +97,8 @@ public class UserRestController {
         return res;
     }
 
-    @GetMapping("/users/{id}/refresh")
-    public Map<String, String> getRefreshToken(@PathVariable long id) {
+    @PutMapping("/users/{id}/refresh")
+    public Map<String, String> getNewRefreshToken(@PathVariable long id) {
         User user = userService.getById(id);
 
         if (user == null) {

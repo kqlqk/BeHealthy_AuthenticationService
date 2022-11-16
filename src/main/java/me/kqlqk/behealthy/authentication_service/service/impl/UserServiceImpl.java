@@ -7,7 +7,6 @@ import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +15,12 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -53,8 +54,7 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email = " + email + " already exists");
         }
 
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        User user = new User(name, email, encoder.encode(password), null);
+        User user = new User(name, email, passwordEncoder.encode(password), null);
         userRepository.save(user);
     }
 
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
             if (!email.matches("^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$")) {
                 throw new IllegalArgumentException("Email should be valid");
             }
-            if (existsByEmail(email)) {
+            if (existsByEmail(email) && !email.equals(user.getEmail())) {
                 throw new IllegalArgumentException("User with email = " + email + " already exists");
             }
 
@@ -82,8 +82,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (password != null && !password.equals("")) {
-            PasswordEncoder encoder = new BCryptPasswordEncoder();
-            user.setPassword(encoder.encode(password));
+            user.setPassword(passwordEncoder.encode(password));
         }
 
         if ((name == null || name.equals("")) &&

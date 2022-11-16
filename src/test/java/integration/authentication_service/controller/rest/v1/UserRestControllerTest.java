@@ -4,15 +4,16 @@ import annotations.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
+import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.impl.TokenServiceImpl;
+import me.kqlqk.behealthy.authentication_service.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +25,10 @@ public class UserRestControllerTest {
 
     @Autowired
     private TokenServiceImpl tokenService;
+
+    @Autowired
+    private UserServiceImpl userService;
+
 
     @Test
     public void getUserById_shouldReturnJsonWithUser() throws Exception {
@@ -63,12 +68,13 @@ public class UserRestControllerTest {
 
     @Test
     public void updateUser_shouldUpdateUser() throws Exception {
-        UserDTO userDTO = new UserDTO(1L, "John", "new_mail@mail.com", "randomPSWD1");
+        User user = userService.getById(1);
+        user.setName(user.getName() + "123");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonUserDTO = objectMapper.writeValueAsString(userDTO);
+        String jsonUserDTO = objectMapper.writeValueAsString(user);
 
-        mockMvc.perform(post("/api/v1/users/1")
+        mockMvc.perform(patch("/api/v1/users/1")
                         .content(jsonUserDTO)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -77,7 +83,7 @@ public class UserRestControllerTest {
 
     @Test
     public void updateUser_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(post("/api/v1/users/1")
+        mockMvc.perform(patch("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -104,8 +110,8 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getAccessToken_shouldGetAccessToken() throws Exception {
-        mockMvc.perform(get("/api/v1/users/1/new_access_token")
+    public void getNewAccessToken_shouldReturnNewAccessToken() throws Exception {
+        mockMvc.perform(put("/api/v1/users/1/access")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -114,8 +120,8 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getAccessToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/users/99/new_access_token")
+    public void getNewAccessToken_shouldReturnJsonWithException() throws Exception {
+        mockMvc.perform(put("/api/v1/users/99/access")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -125,8 +131,8 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getRefreshToken_shouldGetRefreshToken() throws Exception {
-        mockMvc.perform(get("/api/v1/users/1/new_refresh_token")
+    public void getNewRefreshToken_shouldGetRefreshToken() throws Exception {
+        mockMvc.perform(put("/api/v1/users/1/refresh")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -135,8 +141,8 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getRefreshToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/users/99/new_refresh_token")
+    public void getNewRefreshToken_shouldReturnJsonWithException() throws Exception {
+        mockMvc.perform(put("/api/v1/users/99/refresh")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -147,7 +153,7 @@ public class UserRestControllerTest {
 
     @Test
     public void updateTokens_shouldUpdateAccessAndRefreshTokens() throws Exception {
-        mockMvc.perform(get("/api/v1/users/1/update_tokens")
+        mockMvc.perform(put("/api/v1/users/1/tokens")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -158,7 +164,7 @@ public class UserRestControllerTest {
 
     @Test
     public void updateTokens_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/users/99/update_tokens")
+        mockMvc.perform(put("/api/v1/users/99/tokens")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -171,7 +177,7 @@ public class UserRestControllerTest {
     public void validateAccessToken_shouldValidateAccessToken() throws Exception {
         String token = tokenService.createAccessToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/validate_access_token")
+        mockMvc.perform(get("/api/v1/auth/validate/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "Bearer_" + token))
                 .andDo(print())
@@ -180,7 +186,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.valid").exists())
                 .andExpect(jsonPath("$.valid", is(true)));
 
-        mockMvc.perform(get("/api/v1/auth/validate_access_token")
+        mockMvc.perform(get("/api/v1/auth/validate/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "Bearer_token"))
                 .andDo(print())
@@ -193,7 +199,7 @@ public class UserRestControllerTest {
 
     @Test
     public void validateAccessToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/validate_access_token")
+        mockMvc.perform(get("/api/v1/auth/validate/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "token"))
                 .andDo(print())
@@ -202,7 +208,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Access token should starts with Bearer_")));
 
-        mockMvc.perform(get("/api/v1/auth/validate_access_token")
+        mockMvc.perform(get("/api/v1/auth/validate/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("header", "Bearer_token"))
                 .andDo(print())
@@ -217,7 +223,7 @@ public class UserRestControllerTest {
     public void validateRefreshToken_shouldValidateRefreshToken() throws Exception {
         RefreshToken refreshToken = tokenService.createRefreshToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/validate_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/validate/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "Bearer_" + refreshToken.getToken()))
                 .andDo(print())
@@ -226,7 +232,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.valid").exists())
                 .andExpect(jsonPath("$.valid", is(true)));
 
-        mockMvc.perform(get("/api/v1/auth/validate_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/validate/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "Bearer_token"))
                 .andDo(print())
@@ -238,7 +244,7 @@ public class UserRestControllerTest {
 
     @Test
     public void validateRefreshToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/validate_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/validate/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "token"))
                 .andDo(print())
@@ -247,7 +253,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Refresh token should starts with Bearer_")));
 
-        mockMvc.perform(get("/api/v1/auth/validate_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/validate/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("header", "Bearer_token"))
                 .andDo(print())
@@ -262,7 +268,7 @@ public class UserRestControllerTest {
     public void getAccessTokenFromRequest_shouldReturnAccessTokenFromRequest() throws Exception {
         String token = tokenService.createAccessToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/get_access_token")
+        mockMvc.perform(get("/api/v1/auth/request/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "Bearer_" + token))
                 .andDo(print())
@@ -274,7 +280,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getAccessTokenFromRequest_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/get_access_token")
+        mockMvc.perform(get("/api/v1/auth/request/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "token"))
                 .andDo(print())
@@ -282,7 +288,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Access token should starts with Bearer_")));
 
-        mockMvc.perform(get("/api/v1/auth/get_access_token")
+        mockMvc.perform(get("/api/v1/auth/request/access")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("header", "Bearer_token"))
                 .andDo(print())
@@ -295,7 +301,7 @@ public class UserRestControllerTest {
     public void getRefreshTokenFromRequest_shouldReturnRefreshTokenFromRequest() throws Exception {
         RefreshToken token = tokenService.createRefreshToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/get_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/request/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "Bearer_" + token.getToken()))
                 .andDo(print())
@@ -307,7 +313,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getRefreshTokenFromRequest_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/get_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/request/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "token"))
                 .andDo(print())
@@ -315,7 +321,7 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.info").exists())
                 .andExpect(jsonPath("$.info", is("Refresh token should starts with Bearer_")));
 
-        mockMvc.perform(get("/api/v1/auth/get_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/request/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("header", "Bearer_token"))
                 .andDo(print())
@@ -328,7 +334,7 @@ public class UserRestControllerTest {
     public void getEmailFromAccessToken_shouldReturnEmailFromAccessToken() throws Exception {
         String token = tokenService.createAccessToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/get_email_from_access_token")
+        mockMvc.perform(get("/api/v1/auth/request/access/email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "Bearer_" + token))
                 .andDo(print())
@@ -339,7 +345,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getEmailFromAccessToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/get_email_from_access_token")
+        mockMvc.perform(get("/api/v1/auth/request/access/email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_access", "Bearer_token"))
                 .andDo(print())
@@ -352,7 +358,7 @@ public class UserRestControllerTest {
     public void getEmailFromRefreshToken_shouldReturnEmailFromRefreshToken() throws Exception {
         RefreshToken token = tokenService.createRefreshToken("john@mail.com");
 
-        mockMvc.perform(get("/api/v1/auth/get_email_from_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/request/refresh/email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "Bearer_" + token.getToken()))
                 .andDo(print())
@@ -363,7 +369,7 @@ public class UserRestControllerTest {
 
     @Test
     public void getEmailFromRefreshToken_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(get("/api/v1/auth/get_email_from_refresh_token")
+        mockMvc.perform(get("/api/v1/auth/request/refresh/email")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization_refresh", "Bearer_token"))
                 .andDo(print())
