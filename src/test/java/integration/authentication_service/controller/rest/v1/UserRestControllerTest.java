@@ -74,7 +74,7 @@ public class UserRestControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonUserDTO = objectMapper.writeValueAsString(user);
 
-        mockMvc.perform(patch("/api/v1/users/1")
+        mockMvc.perform(put("/api/v1/users/1")
                         .content(jsonUserDTO)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -83,7 +83,7 @@ public class UserRestControllerTest {
 
     @Test
     public void updateUser_shouldReturnJsonWithException() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/1")
+        mockMvc.perform(put("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -127,7 +127,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("User with id = 99 not found")));
+                .andExpect(jsonPath("$.info", is("UserNotFound | User with id = 99 not found")));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("User with id = 99 not found")));
+                .andExpect(jsonPath("$.info", is("UserNotFound | User with id = 99 not found")));
     }
 
     @Test
@@ -170,7 +170,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("User with id = 99 not found")));
+                .andExpect(jsonPath("$.info", is("UserNotFound | User with id = 99 not found")));
     }
 
     @Test
@@ -206,7 +206,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Access token should starts with Bearer_")));
+                .andExpect(jsonPath("$.info", is("Token | Access token should starts with Bearer_")));
 
         mockMvc.perform(get("/api/v1/auth/validate/access")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -215,7 +215,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("info", is("Authorization_access header not found")));
+                .andExpect(jsonPath("info", is("Token | Authorization_access header not found")));
 
     }
 
@@ -251,7 +251,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Refresh token should starts with Bearer_")));
+                .andExpect(jsonPath("$.info", is("Token | Refresh token should starts with Bearer_")));
 
         mockMvc.perform(get("/api/v1/auth/validate/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -260,7 +260,7 @@ public class UserRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Authorization_refresh header not found")));
+                .andExpect(jsonPath("$.info", is("Token | Authorization_refresh header not found")));
 
     }
 
@@ -286,7 +286,7 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Access token should starts with Bearer_")));
+                .andExpect(jsonPath("$.info", is("Token | Access token should starts with Bearer_")));
 
         mockMvc.perform(get("/api/v1/auth/request/access")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -294,7 +294,7 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Authorization_access header not found")));
+                .andExpect(jsonPath("$.info", is("Token | Authorization_access header not found")));
     }
 
     @Test
@@ -319,7 +319,7 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Refresh token should starts with Bearer_")));
+                .andExpect(jsonPath("$.info", is("Token | Refresh token should starts with Bearer_")));
 
         mockMvc.perform(get("/api/v1/auth/request/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -327,7 +327,7 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Authorization_refresh header not found")));
+                .andExpect(jsonPath("$.info", is("Token | Authorization_refresh header not found")));
     }
 
     @Test
@@ -351,7 +351,7 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Access token cannot be parsed")));
+                .andExpect(jsonPath("$.info", is("Token | Access token cannot be parsed")));
     }
 
     @Test
@@ -375,6 +375,6 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.info").exists())
-                .andExpect(jsonPath("$.info", is("Refresh token cannot be parsed")));
+                .andExpect(jsonPath("$.info", is("Token | Refresh token cannot be parsed")));
     }
 }
