@@ -1,7 +1,6 @@
 package integration.authentication_service.service;
 
 import annotations.ServiceTest;
-import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -55,16 +54,13 @@ public class UserServiceImplTest {
         User invalidUser = userService.getById(99);
         assertThat(userService.isValid(invalidUser)).isFalse();
 
-        User invalidUser2 = new User(null, "steve@mail.com", "randPswd", new RefreshToken());
+        User invalidUser2 = new User(null, "steve@mail.com", "randPswd");
         assertThat(userService.isValid(invalidUser2)).isFalse();
 
-        User invalidUser3 = new User("Steve", null, "randPswd", new RefreshToken());
+        User invalidUser3 = new User("Steve", null, "randPswd");
         assertThat(userService.isValid(invalidUser3)).isFalse();
 
-        User invalidUser4 = new User("Steve", "steve@mail.com", null, new RefreshToken());
+        User invalidUser4 = new User("Steve", "steve@mail.com", null);
         assertThat(userService.isValid(invalidUser4)).isFalse();
-
-        User invalidUser5 = new User("Steve", "steve@mail.com", "randPswd", null);
-        assertThat(userService.isValid(invalidUser5)).isFalse();
     }
 }

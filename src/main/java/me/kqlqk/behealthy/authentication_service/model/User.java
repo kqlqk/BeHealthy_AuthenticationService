@@ -1,7 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -25,15 +24,9 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "refresh_token_id", referencedColumnName = "id")
-    @EqualsAndHashCode.Exclude
-    private RefreshToken refreshToken;
-
-    public User(String name, String email, String password, RefreshToken refreshToken) {
+    public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.refreshToken = refreshToken;
     }
 }
