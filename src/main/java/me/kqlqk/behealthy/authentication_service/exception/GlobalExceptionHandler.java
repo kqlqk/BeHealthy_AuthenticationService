@@ -2,8 +2,6 @@ package me.kqlqk.behealthy.authentication_service.exception;
 
 import me.kqlqk.behealthy.authentication_service.dto.ExceptionDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenException;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserAlreadyExistsException;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,14 +15,9 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({
-            UserAlreadyExistsException.class,
-            UserNotFoundException.class,
-            TokenException.class,
-            IllegalArgumentException.class,
-            NullPointerException.class})
+    @ExceptionHandler({RuntimeException.class, TokenException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handle(Exception e) {
+    public ExceptionDTO handle(RuntimeException e) {
         ExceptionDTO exceptionDTO = new ExceptionDTO();
         exceptionDTO.setInfo(e.getMessage());
 

@@ -31,12 +31,23 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
 
         User user = userService.getByEmail(email);
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user);
 
-        return refreshTokenRepository.findByUser(user);
+        if (refreshToken == null) {
+            throw new TokenNotFoundException("Token for user with email = " + email + " not found");
+        }
+
+        return refreshToken;
     }
 
     @Override
-    public boolean existsByUser(@NonNull User user) {
+    public boolean existsByUserEmail(@NonNull String email) {
+        if (!userService.existsByEmail(email)) {
+            throw new UserNotFoundException("User with email " + email + " not found");
+        }
+
+        User user = userService.getByEmail(email);
+
         return refreshTokenRepository.existsByUser(user);
     }
 
