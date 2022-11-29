@@ -1,6 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.cfg;
 
-import me.kqlqk.behealthy.authentication_service.cfg.filters.JWTFilter;
+import me.kqlqk.behealthy.authentication_service.cfg.filter.JWTFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -33,7 +33,11 @@ public class Config {
                 .and()
                 .authorizeHttpRequests(
                         auth -> auth
-                                .antMatchers("/api/v1/auth/login", "/api/v1/auth/access", "/api/v1/auth/update").permitAll()
+                                .antMatchers(
+                                        "/api/v1/auth/login",
+                                        "/api/v1/auth/registration",
+                                        "/api/v1/auth/access",
+                                        "/api/v1/auth/update").permitAll()
                                 .anyRequest().authenticated()
                                 .and()
                                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)

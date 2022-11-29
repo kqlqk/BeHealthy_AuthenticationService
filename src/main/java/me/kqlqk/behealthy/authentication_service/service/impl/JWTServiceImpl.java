@@ -181,6 +181,6 @@ public class JWTServiceImpl implements JWTService {
             }
         }
 
-        throw new TokenException("Token isn't valid");
+        throw new TokenException("Token invalid");
     }
 }

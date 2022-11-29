@@ -1,7 +1,8 @@
-package me.kqlqk.behealthy.authentication_service.cfg.filters;
+package me.kqlqk.behealthy.authentication_service.cfg.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.kqlqk.behealthy.authentication_service.dto.ExceptionDTO;
+import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenNotFoundException;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -10,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -21,15 +21,13 @@ import java.io.IOException;
 
 @Component
 public class JWTFilter extends OncePerRequestFilter {
-    private static final String AUTHORIZATION = "Authorization";
-
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
 
     private final String[] urisNotToCheck = {
             "/api/v1", "/api/v1/",
-            "/api/v1/registration", "/api/v1/registration/",
-            "/api/v1/login", "/api/v1/login/",
+            "/api/v1/auth/registration", "/api/v1/auth/registration/",
+            "/api/v1/auth/login", "/api/v1/auth/login/",
             "/api/v1/auth/access", "/api/v1/auth/access/",
             "/api/v1/auth/update", "/api/v1/auth/update/"
     };
@@ -49,10 +47,15 @@ public class JWTFilter extends OncePerRequestFilter {
             }
         }
 
-        String accessToken = getTokenFromRequest(request);
+        String accessToken;
+        try {
+            accessToken = getTokenFromRequest(request);
+        } catch (TokenNotFoundException e) {
+            postException(e, response);
+            return;
+        }
 
         boolean tokenValid;
-
         try {
             tokenValid = jwtService.validateAccessToken(accessToken);
         } catch (RuntimeException e) {
@@ -81,11 +84,15 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        final String bearer = request.getHeader(AUTHORIZATION);
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null) {
+            if (authHeader.startsWith("Bearer ")) {
+                return authHeader.substring(7);
+            }
+            throw new TokenNotFoundException("Bearer token not found");
         }
-        return null;
+        throw new TokenNotFoundException("Authorization header not found");
     }
 
     private void postException(Exception e, HttpServletResponse response) throws IOException {
