@@ -88,13 +88,13 @@ public class JWTServiceImpl implements JWTService {
     }
 
     @Override
-    public boolean validateAccessToken(@NonNull String token) {
-        return validateToken(token, accessTokenSecret);
+    public boolean validateAccessToken(@NonNull String accessToken) {
+        return validateToken(accessToken, accessTokenSecret);
     }
 
     @Override
-    public boolean validateRefreshToken(@NonNull String token) {
-        return validateToken(token, refreshTokenSecret);
+    public boolean validateRefreshToken(@NonNull String refreshToken) {
+        return validateToken(refreshToken, refreshTokenSecret);
     }
 
     private boolean validateToken(@NonNull String token, @NonNull Key secret) {

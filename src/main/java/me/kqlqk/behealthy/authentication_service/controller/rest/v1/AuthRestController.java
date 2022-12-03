@@ -3,6 +3,7 @@ package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 import me.kqlqk.behealthy.authentication_service.dto.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.RegistrationDTO;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
+import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserAlreadyExistsException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
@@ -77,5 +78,21 @@ public class AuthRestController {
     @PostMapping("/update")
     public TokensDTO updateTokens(@RequestBody TokensDTO tokensDTO) {
         return jwtService.updateTokens(tokensDTO.getRefreshToken());
+    }
+
+    @PostMapping("/access/validate")
+    public ValidateDTO validateAccessToken(@RequestBody TokensDTO tokensDTO) {
+        ValidateDTO validateDTO = new ValidateDTO();
+        validateDTO.setValid(jwtService.validateAccessToken(tokensDTO.getAccessToken()));
+
+        return validateDTO;
+    }
+
+    @PostMapping("/access/email")
+    public Map<String, String> getEmailFromAccessToken(@RequestBody TokensDTO tokensDTO) {
+        Map<String, String> res = new HashMap<>();
+        res.put("email", jwtService.getAccessClaims(tokensDTO.getAccessToken()).getSubject());
+
+        return res;
     }
 }

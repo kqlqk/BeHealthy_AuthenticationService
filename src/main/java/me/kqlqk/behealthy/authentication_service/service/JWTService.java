@@ -10,13 +10,13 @@ public interface JWTService {
 
     String generateAndSaveRefreshToken(String userEmail);
 
-    boolean validateAccessToken(String token);
+    boolean validateAccessToken(String accessToken);
 
-    boolean validateRefreshToken(String token);
+    boolean validateRefreshToken(String refreshToken);
 
-    Claims getAccessClaims(String token);
+    Claims getAccessClaims(String accessToken);
 
-    Claims getRefreshClaims(String token);
+    Claims getRefreshClaims(String refreshToken);
 
     String getNewAccessToken(String refreshToken);
 
