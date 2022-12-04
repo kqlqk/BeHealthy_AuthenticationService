@@ -1,5 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
+import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class UserRestController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -36,12 +38,18 @@ public class UserRestController {
     @PostMapping("/users")
     public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO) {
         userService.create(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
+
+        log.info(userDTO.getEmail() + " was created");
+
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
         userService.update(id, userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
+
+        log.info(userDTO.getEmail() + " was updated");
+
         return ResponseEntity.ok().build();
     }
 

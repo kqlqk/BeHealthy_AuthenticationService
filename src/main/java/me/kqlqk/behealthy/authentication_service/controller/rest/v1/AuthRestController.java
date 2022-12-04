@@ -1,5 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
+import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.RegistrationDTO;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Slf4j
 public class AuthRestController {
     private final UserService userService;
     private final JWTService jwtService;
@@ -50,6 +52,8 @@ public class AuthRestController {
         String accessToken = jwtService.generateAccessToken(user.getEmail());
         String refreshToken = jwtService.generateAndSaveRefreshToken(user.getEmail());
 
+        log.info(user.getEmail() + " got new accessToken, refreshToken");
+
         return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
     }
 
@@ -64,6 +68,8 @@ public class AuthRestController {
         String accessToken = jwtService.generateAccessToken(registrationDTO.getEmail());
         String refreshToken = jwtService.generateAndSaveRefreshToken(registrationDTO.getEmail());
 
+        log.info(registrationDTO.getEmail() + " registered, got new accessToken, refreshToken");
+
         return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
     }
 
@@ -72,12 +78,20 @@ public class AuthRestController {
         Map<String, String> token = new HashMap<>();
         token.put("accessToken", jwtService.getNewAccessToken(tokensDTO.getRefreshToken()));
 
+        log.info(jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject() +
+                " got new accessToken");
+
         return token;
     }
 
     @PostMapping("/update")
     public TokensDTO updateTokens(@RequestBody TokensDTO tokensDTO) {
-        return jwtService.updateTokens(tokensDTO.getRefreshToken());
+        TokensDTO tokens = jwtService.updateTokens(tokensDTO.getRefreshToken());
+
+        log.info(jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject()
+                + " updated tokens");
+
+        return tokens;
     }
 
     @PostMapping("/access/validate")
