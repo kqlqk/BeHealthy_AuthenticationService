@@ -42,11 +42,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public boolean existsByUserEmail(@NonNull String email) {
-        if (!userService.existsByEmail(email)) {
-            throw new UserNotFoundException("User with email " + email + " not found");
-        }
-
         User user = userService.getByEmail(email);
+
+        if (user == null) {
+            return false;
+        }
 
         return refreshTokenRepository.existsByUser(user);
     }

@@ -41,12 +41,6 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void getAll_shouldReturnAllUsers() {
-        assertThat(userService.getAll()).isNotEmpty();
-        assertThat(userService.getAll()).hasSize(2);
-    }
-
-    @Test
     public void isValid_shouldCheckIsUserValid() {
         User validUser = userService.getById(1);
         assertThat(userService.isValid(validUser)).isTrue();

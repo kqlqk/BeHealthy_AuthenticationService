@@ -18,6 +18,6 @@ create table refresh_tokens
     token   varchar not null,
 
     primary key (id),
-    foreign key (user_id) references users (id)
-        on delete cascade
+    foreign key (user_id)
+        references users (id) on delete cascade
 );

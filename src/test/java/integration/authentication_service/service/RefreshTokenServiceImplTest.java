@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ServiceTest
-public class RefreshTokenServiceTest {
+public class RefreshTokenServiceImplTest {
     @Autowired
     private RefreshTokenServiceImpl refreshTokenService;
 
@@ -33,6 +33,12 @@ public class RefreshTokenServiceTest {
         assertThat(refreshToken).isNotNull();
 
         assertThrows(UserNotFoundException.class, () -> refreshTokenService.getByUserEmail("-"));
+    }
+
+    @Test
+    public void existsBYUserEmail_shouldCheckIfExistsBYUserEmail() {
+        assertThat(refreshTokenService.existsByUserEmail("john@mail.com")).isTrue();
+        assertThat(refreshTokenService.existsByUserEmail("-")).isFalse();
     }
 
     @Test

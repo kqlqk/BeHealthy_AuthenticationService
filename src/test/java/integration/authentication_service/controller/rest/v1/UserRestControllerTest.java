@@ -103,5 +103,4 @@ public class UserRestControllerTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").exists());
     }
-
 }

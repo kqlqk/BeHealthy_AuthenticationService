@@ -25,4 +25,13 @@ public class RefreshTokenRepositoryTest {
 
         assertThat(refreshTokenRepository.findByUser(null)).isNull();
     }
+
+    @Test
+    public void existsByUser_shouldCheckIfExistsByUser() {
+        User user = userService.getById(1);
+
+        assertThat(refreshTokenRepository.existsByUser(user)).isTrue();
+
+        assertThat(refreshTokenRepository.existsByUser(null)).isFalse();
+    }
 }

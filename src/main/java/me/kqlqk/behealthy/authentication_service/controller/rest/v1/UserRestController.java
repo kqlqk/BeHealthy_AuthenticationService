@@ -2,6 +2,7 @@ package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
+import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -67,19 +66,15 @@ public class UserRestController {
     }
 
     @PostMapping("/users/{id}/password/check")
-    public ResponseEntity<?> checkUserPassword(@PathVariable long id, @RequestBody String oldPassword) {
+    public ValidateDTO checkUserPassword(@PathVariable long id, @RequestBody String password) {
         if (!userService.existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
         }
 
-        Map<String, Boolean> validation = new HashMap<>();
+        ValidateDTO validateDTO = new ValidateDTO();
 
-        if (passwordEncoder.matches(oldPassword, getUserById(id).getPassword())) {
-            validation.put("valid", true);
-        } else {
-            validation.put("valid", false);
-        }
+        validateDTO.setValid(passwordEncoder.matches(password, getUserById(id).getPassword()));
 
-        return ResponseEntity.ok(validation);
+        return validateDTO;
     }
 }
