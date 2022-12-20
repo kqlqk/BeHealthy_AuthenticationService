@@ -39,6 +39,8 @@ public class AuthRestController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+        loginDTO.setEmail(loginDTO.getEmail().toLowerCase());
+
         if (!userService.existsByEmail(loginDTO.getEmail())) {
             throw new UserNotFoundException("Bad credentials");
         }
@@ -59,6 +61,8 @@ public class AuthRestController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
+        registrationDTO.setEmail(registrationDTO.getEmail().toLowerCase());
+
         if (userService.existsByEmail(registrationDTO.getEmail())) {
             throw new UserAlreadyExistsException("User with email = " + registrationDTO.getEmail() + " already exists");
         }
