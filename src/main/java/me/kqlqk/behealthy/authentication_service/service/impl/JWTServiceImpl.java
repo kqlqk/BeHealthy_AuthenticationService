@@ -71,13 +71,13 @@ public class JWTServiceImpl implements JWTService {
                 .signWith(refreshTokenSecret)
                 .compact();
 
-        User user = userService.getByEmail(userEmail);
-
         if (refreshTokenService.existsByUserEmail(userEmail)) {
             RefreshToken refreshToken = refreshTokenService.getByUserEmail(userEmail);
             refreshToken.setToken(token);
             refreshTokenService.update(refreshToken);
         } else {
+            User user = userService.getByEmail(userEmail);
+
             RefreshToken refreshToken = new RefreshToken();
             refreshToken.setUser(user);
             refreshToken.setToken(token);
@@ -115,6 +115,7 @@ public class JWTServiceImpl implements JWTService {
         } catch (Exception e) {
             throw new TokenException("Token invalid");
         }
+
     }
 
     @Override

@@ -36,12 +36,6 @@ public class RefreshTokenServiceImplTest {
     }
 
     @Test
-    public void existsBYUserEmail_shouldCheckIfExistsBYUserEmail() {
-        assertThat(refreshTokenService.existsByUserEmail("john@mail.com")).isTrue();
-        assertThat(refreshTokenService.existsByUserEmail("-")).isFalse();
-    }
-
-    @Test
     public void save_shouldSaveRefreshTokenToDB() {
         int size = refreshTokenRepository.findAll().size();
 
