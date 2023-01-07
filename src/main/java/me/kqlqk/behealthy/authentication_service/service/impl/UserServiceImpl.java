@@ -1,7 +1,9 @@
 package me.kqlqk.behealthy.authentication_service.service.impl;
 
 import lombok.NonNull;
+import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserAlreadyExistsException;
+import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
@@ -10,17 +12,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, Validator validator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.validator = validator;
     }
 
     @Override
@@ -49,57 +56,70 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void create(@NonNull String name, @NonNull String email, @NonNull String password) {
-        if (existsByEmail(email)) {
-            throw new UserAlreadyExistsException("User with email = " + email + " already exists");
+    public void create(@NonNull UserDTO userDTO) {
+        if (userDTO.getName() == null || userDTO.getEmail() == null || userDTO.getPassword() == null) {
+            throw new NullPointerException("userDTO is marked non-null but is null");
         }
 
-        User user = new User(name, email, passwordEncoder.encode(password));
+        userDTO.setEmail(userDTO.getEmail().toLowerCase());
+
+        if (existsByEmail(userDTO.getEmail())) {
+            throw new UserAlreadyExistsException("User with email = " + userDTO.getEmail() + " already exists");
+        }
+
+        Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validate(userDTO);
+
+        if (!constraintViolations.isEmpty()) {
+            throw new UserException(constraintViolations.iterator().next().getMessage());
+        }
+
+        User user = new User(userDTO.getName(), userDTO.getEmail(), passwordEncoder.encode(userDTO.getPassword()));
         userRepository.save(user);
     }
 
     @Override
-    public void update(long id, String name, String email, String password) {
-        if (!existsById(id)) {
-            throw new UserNotFoundException("User with id = " + id + " not found");
+    public void update(@NonNull UserDTO userDTO) {
+        if (!existsById(userDTO.getId())) {
+            throw new UserNotFoundException("User with id = " + userDTO.getId() + " not found");
         }
 
-        User user = getById(id);
+        User user = getById(userDTO.getId());
 
-        if (name != null && !name.equals("")) {
-            user.setName(name);
-        }
+        if (userDTO.getName() != null) {
+            Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validateProperty(userDTO, "name");
 
-        if (email != null && !email.equals("")) {
-            if (!email.matches("^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$")) {
-                throw new IllegalArgumentException("Email should be valid");
+            if (constraintViolations.isEmpty()) {
+                user.setName(userDTO.getName());
+            } else {
+                throw new UserException(constraintViolations.iterator().next().getMessage());
             }
-            if (existsByEmail(email) && !email.equals(user.getEmail())) {
-                throw new IllegalArgumentException("User with email = " + email + " already exists");
+        }
+
+        if (userDTO.getEmail() != null) {
+            Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validateProperty(userDTO, "email");
+
+            if (constraintViolations.isEmpty()) {
+                user.setEmail(userDTO.getEmail().toLowerCase());
+            } else {
+                throw new UserException(constraintViolations.iterator().next().getMessage());
             }
-
-            user.setEmail(email);
         }
 
-        if (password != null && !password.equals("")) {
-            user.setPassword(passwordEncoder.encode(password));
+        if (userDTO.getPassword() != null) {
+            Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validateProperty(userDTO, "password");
+
+            if (constraintViolations.isEmpty()) {
+                user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+            } else {
+                throw new UserException(constraintViolations.iterator().next().getMessage());
+            }
         }
 
-        if ((name == null || name.equals("")) &&
-                (email == null || email.equals("")) &&
-                (password == null || password.equals(""))) {
+        if (userDTO.getName() == null && userDTO.getEmail() == null && userDTO.getPassword() == null) {
             throw new IllegalArgumentException("Minimum 1 field should be updated");
         }
 
         userRepository.save(user);
     }
 
-    @Override
-    public boolean isValid(User user) {
-        return user != null &&
-                existsById(user.getId()) &&
-                (user.getName() != null || !user.getName().equals("")) &&
-                (user.getEmail() != null || !user.getEmail().equals("")) &&
-                (user.getPassword() != null || !user.getPassword().equals(""));
-    }
 }
