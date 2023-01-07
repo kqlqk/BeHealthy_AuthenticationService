@@ -1,11 +1,9 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
-import me.kqlqk.behealthy.authentication_service.dto.LoginDTO;
-import me.kqlqk.behealthy.authentication_service.dto.RegistrationDTO;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
+import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserAlreadyExistsException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
@@ -38,41 +36,36 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-        loginDTO.setEmail(loginDTO.getEmail().toLowerCase());
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+        userDTO.setEmail(userDTO.getEmail().toLowerCase());
 
-        if (!userService.existsByEmail(loginDTO.getEmail())) {
+        if (!userService.existsByEmail(userDTO.getEmail())) {
             throw new UserNotFoundException("Bad credentials");
         }
 
-        User user = userService.getByEmail(loginDTO.getEmail());
+        User user = userService.getByEmail(userDTO.getEmail());
 
-        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
             throw new UserNotFoundException("Bad credentials");
         }
 
         String accessToken = jwtService.generateAccessToken(user.getEmail());
         String refreshToken = jwtService.generateAndSaveRefreshToken(user.getEmail());
 
-        log.info(user.getEmail() + " got new accessToken, refreshToken");
+        log.info("User with id = " + user.getId() + " got new accessToken, refreshToken");
 
         return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
-        registrationDTO.setEmail(registrationDTO.getEmail().toLowerCase());
+    public ResponseEntity<?> registration(@RequestBody @Valid UserDTO userDTO) {
+        userService.create(userDTO);
 
-        if (userService.existsByEmail(registrationDTO.getEmail())) {
-            throw new UserAlreadyExistsException("User with email = " + registrationDTO.getEmail() + " already exists");
-        }
+        String accessToken = jwtService.generateAccessToken(userDTO.getEmail());
+        String refreshToken = jwtService.generateAndSaveRefreshToken(userDTO.getEmail());
 
-        userService.create(registrationDTO.getName(), registrationDTO.getEmail(), registrationDTO.getPassword());
-
-        String accessToken = jwtService.generateAccessToken(registrationDTO.getEmail());
-        String refreshToken = jwtService.generateAndSaveRefreshToken(registrationDTO.getEmail());
-
-        log.info(registrationDTO.getEmail() + " registered, got new accessToken, refreshToken");
+        long userId = userService.getByEmail(userDTO.getEmail()).getId();
+        log.info("User with id = " + userId + " registered, got new accessToken, refreshToken");
 
         return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
     }
@@ -82,8 +75,9 @@ public class AuthRestController {
         Map<String, String> token = new HashMap<>();
         token.put("accessToken", jwtService.getNewAccessToken(tokensDTO.getRefreshToken()));
 
-        log.info(jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject() +
-                " got new accessToken");
+        String userEmail = jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject();
+        long userId = userService.getByEmail(userEmail).getId();
+        log.info("User with id = " + userId + " got new accessToken");
 
         return token;
     }
@@ -92,8 +86,9 @@ public class AuthRestController {
     public TokensDTO updateTokens(@RequestBody TokensDTO tokensDTO) {
         TokensDTO tokens = jwtService.updateTokens(tokensDTO.getRefreshToken());
 
-        log.info(jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject()
-                + " updated tokens");
+        String userEmail = jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject();
+        long userId = userService.getByEmail(userEmail).getId();
+        log.info("User with id = " + userId + " updated tokens");
 
         return tokens;
     }

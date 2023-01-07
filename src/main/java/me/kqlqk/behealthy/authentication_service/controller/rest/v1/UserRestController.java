@@ -1,5 +1,6 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
@@ -9,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -26,6 +25,7 @@ public class UserRestController {
     }
 
     @GetMapping("/users/{id}")
+    @JsonView(UserDTO.WithoutPassword.class)
     public UserDTO getUserById(@PathVariable long id) {
         if (!userService.existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
@@ -34,27 +34,20 @@ public class UserRestController {
         return UserDTO.convertFromUserToUserDTO(userService.getById(id));
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO) {
-        userService.create(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
-
-        log.info(userDTO.getEmail() + " was created");
-
-        return ResponseEntity.ok().build();
-    }
-
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
-        userService.update(id, userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
+        userDTO.setId(id);
+        userService.update(userDTO);
 
-        log.info(userDTO.getEmail() + " was updated");
+        log.info("User with id = " + userDTO.getId() + " was updated");
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/users")
+    @JsonView(UserDTO.WithoutPassword.class)
     public ResponseEntity<?> getAllUsersOrSpecified(@RequestParam(required = false) String email) {
-        if (email == null || email.equals("")) {
+        if (email == null) {
             return ResponseEntity.ok(UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll()));
         }
 
@@ -66,14 +59,14 @@ public class UserRestController {
     }
 
     @PostMapping("/users/{id}/password/check")
-    public ValidateDTO checkUserPassword(@PathVariable long id, @RequestBody String password) {
+    public ValidateDTO checkUserPassword(@PathVariable long id, @RequestBody UserDTO userDTO) {
         if (!userService.existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
         }
 
         ValidateDTO validateDTO = new ValidateDTO();
 
-        validateDTO.setValid(passwordEncoder.matches(password, getUserById(id).getPassword()));
+        validateDTO.setValid(passwordEncoder.matches(userDTO.getPassword(), getUserById(id).getPassword()));
 
         return validateDTO;
     }
