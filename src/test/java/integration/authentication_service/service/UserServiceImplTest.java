@@ -49,6 +49,21 @@ public class UserServiceImplTest {
         UserDTO userDTO3 = new UserDTO("steve", "steve@mail.com", invalidPassword);
 
         assertThrows(UserException.class, () -> userService.create(userDTO3));
+
+
+        UserDTO userDTO4 = new UserDTO(null, "steve@mail.com", "Password12345");
+
+        assertThrows(UserException.class, () -> userService.create(userDTO4));
+
+
+        UserDTO userDTO5 = new UserDTO("steve", null, "Password12345");
+
+        assertThrows(UserException.class, () -> userService.create(userDTO5));
+
+
+        UserDTO userDTO6 = new UserDTO("steve", "steve@mail.com", null);
+
+        assertThrows(UserException.class, () -> userService.create(userDTO6));
     }
 
     @Test

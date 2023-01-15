@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
+import me.kqlqk.behealthy.authentication_service.service.JWTService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -24,6 +25,9 @@ public class AuthRestControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JWTService jwtService;
 
     @Test
     public void login_shouldReturnTokens() throws Exception {
@@ -95,8 +99,10 @@ public class AuthRestControllerTest {
 
     @Test
     public void getNewAccessToken_shouldReturnNewAccessToken() throws Exception {
-        TokensDTO validTokensDTO = new TokensDTO(null,
-                "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqb2huQG1haWwuY29tIiwiZXhwIjoxNjczMTc3MzQ2fQ.-2omlZ2c_TPjbBVUb2ODBm_z8cvuknyLRwFZc47aXvHDjurWAQeqksAYKjmYr_nb");
+        String existedEmail = "john@mail.com";
+        String refreshToken = jwtService.generateAndSaveRefreshToken(existedEmail);
+
+        TokensDTO validTokensDTO = new TokensDTO(null, refreshToken);
         ObjectMapper objectMapper = new ObjectMapper();
         String validJson = objectMapper.writeValueAsString(validTokensDTO);
 
@@ -124,8 +130,10 @@ public class AuthRestControllerTest {
 
     @Test
     public void updateTokens_shouldUpdateTokens() throws Exception {
-        TokensDTO validTokensDTO = new TokensDTO(null,
-                "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqb2huQG1haWwuY29tIiwiZXhwIjoxNjczMTc3MzQ2fQ.-2omlZ2c_TPjbBVUb2ODBm_z8cvuknyLRwFZc47aXvHDjurWAQeqksAYKjmYr_nb");
+        String existedEmail = "john@mail.com";
+        String refreshToken = jwtService.generateAndSaveRefreshToken(existedEmail);
+
+        TokensDTO validTokensDTO = new TokensDTO(null, refreshToken);
         ObjectMapper objectMapper = new ObjectMapper();
         String validJson = objectMapper.writeValueAsString(validTokensDTO);
 

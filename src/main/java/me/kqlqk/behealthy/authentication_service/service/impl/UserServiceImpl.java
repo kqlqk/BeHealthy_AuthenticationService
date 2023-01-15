@@ -57,8 +57,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void create(@NonNull UserDTO userDTO) {
-        if (userDTO.getName() == null || userDTO.getEmail() == null || userDTO.getPassword() == null) {
-            throw new NullPointerException("userDTO is marked non-null but is null");
+        Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validate(userDTO);
+
+        if (!constraintViolations.isEmpty()) {
+            throw new UserException(constraintViolations.iterator().next().getMessage());
         }
 
         userDTO.setEmail(userDTO.getEmail().toLowerCase());
@@ -67,11 +69,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with email = " + userDTO.getEmail() + " already exists");
         }
 
-        Set<ConstraintViolation<UserDTO>> constraintViolations = validator.validate(userDTO);
-
-        if (!constraintViolations.isEmpty()) {
-            throw new UserException(constraintViolations.iterator().next().getMessage());
-        }
 
         User user = new User(userDTO.getName(), userDTO.getEmail(), passwordEncoder.encode(userDTO.getPassword()));
         userRepository.save(user);
