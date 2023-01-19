@@ -1,6 +1,5 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
@@ -25,7 +24,6 @@ public class UserRestController {
     }
 
     @GetMapping("/users/{id}")
-    @JsonView(UserDTO.WithoutPassword.class)
     public UserDTO getUserById(@PathVariable long id) {
         if (!userService.existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
@@ -45,7 +43,6 @@ public class UserRestController {
     }
 
     @GetMapping("/users")
-    @JsonView(UserDTO.WithoutPassword.class)
     public ResponseEntity<?> getAllUsersOrSpecified(@RequestParam(required = false) String email) {
         if (email == null) {
             return ResponseEntity.ok(UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll()));

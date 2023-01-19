@@ -1,6 +1,7 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
+import me.kqlqk.behealthy.authentication_service.dto.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
 import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
@@ -11,10 +12,7 @@ import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -36,16 +34,16 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
-        userDTO.setEmail(userDTO.getEmail().toLowerCase());
+    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO loginDTO) {
+        loginDTO.setEmail(loginDTO.getEmail().toLowerCase());
 
-        if (!userService.existsByEmail(userDTO.getEmail())) {
+        if (!userService.existsByEmail(loginDTO.getEmail())) {
             throw new UserNotFoundException("Bad credentials");
         }
 
-        User user = userService.getByEmail(userDTO.getEmail());
+        User user = userService.getByEmail(loginDTO.getEmail());
 
-        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new UserNotFoundException("Bad credentials");
         }
 
@@ -101,10 +99,10 @@ public class AuthRestController {
         return validateDTO;
     }
 
-    @PostMapping("/access/email")
-    public Map<String, String> getEmailFromAccessToken(@RequestBody TokensDTO tokensDTO) {
+    @GetMapping("/access/email")
+    public Map<String, String> getEmailFromAccessToken(@RequestParam String accessToken) {
         Map<String, String> res = new HashMap<>();
-        res.put("email", jwtService.getAccessClaims(tokensDTO.getAccessToken()).getSubject());
+        res.put("email", jwtService.getAccessClaims(accessToken).getSubject());
 
         return res;
     }
