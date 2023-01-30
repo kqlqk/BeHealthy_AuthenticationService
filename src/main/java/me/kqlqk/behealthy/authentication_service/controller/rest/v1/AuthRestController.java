@@ -10,7 +10,6 @@ import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO loginDTO) {
+    public TokensDTO login(@RequestBody @Valid LoginDTO loginDTO) {
         loginDTO.setEmail(loginDTO.getEmail().toLowerCase());
 
         if (!userService.existsByEmail(loginDTO.getEmail())) {
@@ -52,11 +51,11 @@ public class AuthRestController {
 
         log.info("User with id = " + user.getId() + " got new accessToken, refreshToken");
 
-        return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
+        return new TokensDTO(user.getId(), accessToken, refreshToken);
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody @Valid UserDTO userDTO) {
+    public TokensDTO registration(@RequestBody @Valid UserDTO userDTO) {
         userService.create(userDTO);
 
         String accessToken = jwtService.generateAccessToken(userDTO.getEmail());
@@ -65,19 +64,19 @@ public class AuthRestController {
         long userId = userService.getByEmail(userDTO.getEmail()).getId();
         log.info("User with id = " + userId + " registered, got new accessToken, refreshToken");
 
-        return ResponseEntity.ok(new TokensDTO(accessToken, refreshToken));
+        return new TokensDTO(userId, accessToken, refreshToken);
     }
 
     @PostMapping("/access")
-    public Map<String, String> getNewAccessToken(@RequestBody TokensDTO tokensDTO) {
-        Map<String, String> token = new HashMap<>();
-        token.put("accessToken", jwtService.getNewAccessToken(tokensDTO.getRefreshToken()));
+    public TokensDTO getNewAccessToken(@RequestBody TokensDTO tokensDTO) {
+        TokensDTO responseTokensDTO = new TokensDTO();
+        responseTokensDTO.setAccessToken(jwtService.getNewAccessToken(tokensDTO.getRefreshToken()));
 
         String userEmail = jwtService.getRefreshClaims(tokensDTO.getRefreshToken()).getSubject();
         long userId = userService.getByEmail(userEmail).getId();
         log.info("User with id = " + userId + " got new accessToken");
 
-        return token;
+        return responseTokensDTO;
     }
 
     @PostMapping("/update")
