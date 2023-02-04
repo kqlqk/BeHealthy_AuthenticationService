@@ -34,7 +34,7 @@ public class UserDTO {
     private String email;
 
     @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,50}$",
-            message = "Password should be between 8 and 50 characters, at least: 1 number, 1 uppercase letter, 1 lowercase letter")
+            message = "Password should be between 8 and 50 characters, no spaces, at least: 1 number, 1 uppercase letter, 1 lowercase letter")
     @NotEmpty(message = "Password cannot be null")
     private String password;
 
