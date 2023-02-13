@@ -1,7 +1,6 @@
 package unit.authentication_service.service;
 
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenException;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.RefreshTokenService;
@@ -48,14 +47,6 @@ public class JWTServiceImpTest {
     }
 
     @Test
-    public void generateAccessToken_shouldThrowUserNotFoundException() {
-        String userEmail = "random@mail.com";
-        when(userService.existsByEmail(userEmail)).thenReturn(false);
-
-        assertThrows(UserNotFoundException.class, () -> jwtService.generateAccessToken(userEmail));
-    }
-
-    @Test
     public void generateAndSaveRefreshToken_shouldGenerateAndUpdateRefreshToken() {
         String userEmail = "random@mail.com";
         RefreshToken rt = new RefreshToken();
@@ -64,7 +55,7 @@ public class JWTServiceImpTest {
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(true);
         when(refreshTokenService.getByUserEmail(userEmail)).thenReturn(rt);
 
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         assertThat(refreshToken).matches("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$");
     }
@@ -78,58 +69,58 @@ public class JWTServiceImpTest {
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(false);
         when(userService.getByEmail(userEmail)).thenReturn(u);
 
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         assertThat(refreshToken).matches("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$");
     }
 
     @Test
-    public void generateAndSaveRefreshToken_shouldThrowUserNotFoundException() {
-        String userEmail = "random@mail.com";
-        when(userService.existsByEmail(userEmail)).thenReturn(false);
-
-        assertThrows(UserNotFoundException.class, () -> jwtService.generateAndSaveRefreshToken(userEmail));
-    }
-
-    @Test
-    public void validateAccessToken_shouldValidateAccessTokenOrThrowException() {
+    public void validateAccessToken_shouldValidateAccessToken() {
         String userEmail = "random@mail.com";
         when(userService.existsByEmail(userEmail)).thenReturn(true);
-
         String accessToken = jwtService.generateAccessToken(userEmail);
 
         assertThat(jwtService.validateAccessToken(accessToken)).isTrue();
+    }
+
+    @Test
+    public void validateAccessToken_shouldThrowException() {
         assertThrows(TokenException.class, () -> jwtService.validateAccessToken(""));
     }
 
     @Test
-    public void validateRefreshToken_shouldValidateRefreshTokenOrThrowException() {
+    public void validateRefreshToken_shouldValidateRefreshToken() {
         String userEmail = "random@mail.com";
         User u = new User();
-
         when(userService.existsByEmail(userEmail)).thenReturn(true);
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(false);
         when(userService.getByEmail(userEmail)).thenReturn(u);
-
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         assertThat(jwtService.validateRefreshToken(refreshToken)).isTrue();
+    }
+
+    @Test
+    public void validateRefreshToken_shouldThrowException() {
         assertThrows(TokenException.class, () -> jwtService.validateRefreshToken(""));
     }
 
     @Test
-    public void getAccessClaims_shouldReturnAccessClaimsOrThrowException() {
+    public void getAccessClaims_shouldReturnAccessClaims() {
         String userEmail = "random@mail.com";
         when(userService.existsByEmail(userEmail)).thenReturn(true);
-
         String accessToken = jwtService.generateAccessToken(userEmail);
 
         assertThat(jwtService.getAccessClaims(accessToken)).isNotNull();
+    }
+
+    @Test
+    public void getAccessClaims_shouldThrowException() {
         assertThrows(TokenException.class, () -> jwtService.getAccessClaims(""));
     }
 
     @Test
-    public void getRefreshClaims_shouldReturnRefreshClaimsOrThrowException() {
+    public void getRefreshClaims_shouldReturnRefreshClaims() {
         String userEmail = "random@mail.com";
         User u = new User();
 
@@ -137,14 +128,18 @@ public class JWTServiceImpTest {
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(false);
         when(userService.getByEmail(userEmail)).thenReturn(u);
 
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         assertThat(jwtService.getRefreshClaims(refreshToken)).isNotNull();
+    }
+
+    @Test
+    public void getRefreshClaims_shouldThrowException() {
         assertThrows(TokenException.class, () -> jwtService.getRefreshClaims(""));
     }
 
     @Test
-    public void getNewAccessToken_shouldReturnNewAccessTokenOrThrowException() {
+    public void getNewAccessToken_shouldReturnNewAccessToken() {
         String userEmail = "random@mail.com";
         User u = new User();
         RefreshToken rt = new RefreshToken();
@@ -153,15 +148,17 @@ public class JWTServiceImpTest {
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(false);
         when(userService.getByEmail(userEmail)).thenReturn(u);
 
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         rt.setToken(refreshToken);
         when(refreshTokenService.getByUserEmail(userEmail)).thenReturn(rt);
 
         assertThat(jwtService.getNewAccessToken(refreshToken)).matches("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$");
+    }
 
-        rt.setToken("-");
-        assertThrows(TokenException.class, () -> jwtService.getNewAccessToken(refreshToken));
+    @Test
+    public void getNewAccessToken_shouldThrowException() {
+        assertThrows(TokenException.class, () -> jwtService.getNewAccessToken("-"));
     }
 
     @Test
@@ -174,14 +171,17 @@ public class JWTServiceImpTest {
         when(refreshTokenService.existsByUserEmail(userEmail)).thenReturn(false);
         when(userService.getByEmail(userEmail)).thenReturn(u);
 
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userEmail);
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(userEmail);
 
         rt.setToken(refreshToken);
         when(refreshTokenService.getByUserEmail(userEmail)).thenReturn(rt);
 
         assertThat(jwtService.updateTokens(refreshToken).getAccessToken()).matches("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$");
         assertThat(jwtService.updateTokens(refreshToken).getRefreshToken()).matches("^[\\w-]+\\.[\\w-]+\\.[\\w-]+$");
+    }
 
+    @Test
+    public void updateTokens_shouldThrowException() {
         assertThrows(TokenException.class, () -> jwtService.updateTokens("-"));
     }
 }

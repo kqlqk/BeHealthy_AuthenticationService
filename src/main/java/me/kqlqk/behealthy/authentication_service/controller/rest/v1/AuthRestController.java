@@ -1,10 +1,10 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
-import me.kqlqk.behealthy.authentication_service.dto.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
-import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
+import me.kqlqk.behealthy.authentication_service.dto.userDTO.LoginDTO;
+import me.kqlqk.behealthy.authentication_service.dto.userDTO.RegistrationDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
@@ -47,7 +47,7 @@ public class AuthRestController {
         }
 
         String accessToken = jwtService.generateAccessToken(user.getEmail());
-        String refreshToken = jwtService.generateAndSaveRefreshToken(user.getEmail());
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(user.getEmail());
 
         log.info("User with id = " + user.getId() + " got new accessToken, refreshToken");
 
@@ -55,14 +55,14 @@ public class AuthRestController {
     }
 
     @PostMapping("/registration")
-    public TokensDTO registration(@RequestBody @Valid UserDTO userDTO) {
-        userService.create(userDTO);
+    public TokensDTO registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
+        userService.create(new User(registrationDTO.getName(), registrationDTO.getEmail(), registrationDTO.getPassword()));
 
-        String accessToken = jwtService.generateAccessToken(userDTO.getEmail());
-        String refreshToken = jwtService.generateAndSaveRefreshToken(userDTO.getEmail());
+        String accessToken = jwtService.generateAccessToken(registrationDTO.getEmail());
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(registrationDTO.getEmail());
 
-        long userId = userService.getByEmail(userDTO.getEmail()).getId();
-        log.info("User with id = " + userId + " registered, got new accessToken, refreshToken");
+        long userId = userService.getByEmail(registrationDTO.getEmail()).getId();
+        log.info("User with id = " + userId + " was registered, got new accessToken, refreshToken");
 
         return new TokensDTO(userId, accessToken, refreshToken);
     }

@@ -5,13 +5,13 @@ from refresh_tokens;
 
 
 insert into users (name, email, password)
-values ('John',
-        'john@mail.com',
+values ('user',
+        'user1@mail.com',
         '$2a$12$9y21BQaQmb3VYgy4ziZu2.8.ZdwLbFDHcuXMdtX6ilmEhAQV9mcyC');--Test1234
 
 insert into users (name, email, password)
-values ('Max',
-        'max@gmail.com',
+values ('user',
+        'user2@mail.com',
         '$2a$12$Mf1buarB/YXGkB183.LNJulVNQ86Zhv/giLN8K8TDnZg1GsMAuyla');--Test12345
 
 

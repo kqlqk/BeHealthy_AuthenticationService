@@ -1,4 +1,4 @@
-package me.kqlqk.behealthy.authentication_service.dto;
+package me.kqlqk.behealthy.authentication_service.dto.userDTO;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;

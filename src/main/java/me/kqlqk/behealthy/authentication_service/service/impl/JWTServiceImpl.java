@@ -57,7 +57,7 @@ public class JWTServiceImpl implements JWTService {
     }
 
     @Override
-    public String generateAndSaveRefreshToken(@NonNull String userEmail) {
+    public String generateAndSaveOrUpdateRefreshToken(@NonNull String userEmail) {
         if (!userService.existsByEmail(userEmail)) {
             throw new UserNotFoundException("User with email = " + userEmail + " not found");
         }
@@ -75,7 +75,8 @@ public class JWTServiceImpl implements JWTService {
             RefreshToken refreshToken = refreshTokenService.getByUserEmail(userEmail);
             refreshToken.setToken(token);
             refreshTokenService.update(refreshToken);
-        } else {
+        }
+        else {
             User user = userService.getByEmail(userEmail);
 
             RefreshToken refreshToken = new RefreshToken();
@@ -104,15 +105,20 @@ public class JWTServiceImpl implements JWTService {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (ExpiredJwtException expEx) {
+        }
+        catch (ExpiredJwtException expEx) {
             throw new TokenException("Token expired");
-        } catch (UnsupportedJwtException unsEx) {
+        }
+        catch (UnsupportedJwtException unsEx) {
             throw new TokenException("Token unsupported");
-        } catch (MalformedJwtException mjEx) {
+        }
+        catch (MalformedJwtException mjEx) {
             throw new TokenException("Token Malformed");
-        } catch (SignatureException sEx) {
+        }
+        catch (SignatureException sEx) {
             throw new TokenException("Signature invalid");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new TokenException("Token invalid");
         }
 
@@ -135,53 +141,62 @@ public class JWTServiceImpl implements JWTService {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (ExpiredJwtException expEx) {
+        }
+        catch (ExpiredJwtException expEx) {
             throw new TokenException("Token expired");
-        } catch (UnsupportedJwtException unsEx) {
+        }
+        catch (UnsupportedJwtException unsEx) {
             throw new TokenException("Token unsupported");
-        } catch (MalformedJwtException mjEx) {
+        }
+        catch (MalformedJwtException mjEx) {
             throw new TokenException("Token Malformed");
-        } catch (SignatureException sEx) {
+        }
+        catch (SignatureException sEx) {
             throw new TokenException("Signature invalid");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new TokenException("Token invalid");
         }
     }
 
     @Override
     public String getNewAccessToken(@NonNull String refreshToken) {
-        if (validateRefreshToken(refreshToken)) {
-            String email = getRefreshClaims(refreshToken).getSubject();
-            String refreshTokenDB = refreshTokenService.getByUserEmail(email).getToken();
-
-            if (refreshTokenDB.equals(refreshToken)) {
-                return generateAccessToken(email);
-            } else {
-                throw new TokenException("Token invalid");
-            }
+        if (!validateRefreshToken(refreshToken)) {
+            throw new TokenException("Token invalid");
         }
 
-        return null;
+        String email = getRefreshClaims(refreshToken).getSubject();
+        String refreshTokenDB = refreshTokenService.getByUserEmail(email).getToken();
+
+        if (refreshTokenDB.equals(refreshToken)) {
+            return generateAccessToken(email);
+        }
+        else {
+            throw new TokenException("Token invalid");
+        }
     }
 
     @Override
     public TokensDTO updateTokens(@NonNull String refreshToken) {
-        if (validateRefreshToken(refreshToken)) {
-            String email = getRefreshClaims(refreshToken).getSubject();
-            String refreshTokenDB = refreshTokenService.getByUserEmail(email).getToken();
-
-            if (refreshTokenDB.equals(refreshToken)) {
-                String newAccessToken = generateAccessToken(email);
-                String newRefreshToken = generateAndSaveRefreshToken(email);
-
-                RefreshToken refreshTokenToUpdate = refreshTokenService.getByUserEmail(email);
-                refreshTokenToUpdate.setToken(newRefreshToken);
-                refreshTokenService.update(refreshTokenToUpdate);
-
-                return new TokensDTO(newAccessToken, newRefreshToken);
-            }
+        if (!validateRefreshToken(refreshToken)) {
+            throw new TokenException("Token invalid");
         }
 
-        throw new TokenException("Token invalid");
+        String email = getRefreshClaims(refreshToken).getSubject();
+        String refreshTokenDB = refreshTokenService.getByUserEmail(email).getToken();
+
+        if (refreshTokenDB.equals(refreshToken)) {
+            String newAccessToken = generateAccessToken(email);
+            String newRefreshToken = generateAndSaveOrUpdateRefreshToken(email);
+
+            RefreshToken refreshTokenToUpdate = refreshTokenService.getByUserEmail(email);
+            refreshTokenToUpdate.setToken(newRefreshToken);
+            refreshTokenService.update(refreshTokenToUpdate);
+
+            return new TokensDTO(newAccessToken, newRefreshToken);
+        }
+        else {
+            throw new TokenException("Token invalid");
+        }
     }
 }

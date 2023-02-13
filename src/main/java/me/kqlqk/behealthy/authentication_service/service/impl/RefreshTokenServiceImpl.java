@@ -3,7 +3,6 @@ package me.kqlqk.behealthy.authentication_service.service.impl;
 import lombok.NonNull;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenAlreadyExistsException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenNotFoundException;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.repository.RefreshTokenRepository;
@@ -26,18 +25,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public RefreshToken getByUserEmail(@NonNull String email) {
-        if (!userService.existsByEmail(email)) {
-            throw new UserNotFoundException("User with email " + email + " not found");
-        }
-
-        User user = userService.getByEmail(email);
-        RefreshToken refreshToken = refreshTokenRepository.findByUser(user);
-
-        if (refreshToken == null) {
+        if (!existsByUserEmail(email)) {
             throw new TokenNotFoundException("Token for user with email = " + email + " not found");
         }
 
-        return refreshToken;
+        User user = userService.getByEmail(email);
+
+        return refreshTokenRepository.findByUser(user);
     }
 
     @Override
@@ -52,18 +46,24 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
+    public boolean existsById(long id) {
+        return refreshTokenRepository.existsById(id);
+    }
+
+    @Override
     public void save(@NonNull RefreshToken refreshToken) {
-        if (refreshTokenRepository.existsById(refreshToken.getId()) || refreshTokenRepository.existsByUser(refreshToken.getUser())) {
-            throw new TokenAlreadyExistsException("Token already exists");
+        if (existsByUserEmail(refreshToken.getUser().getEmail())) {
+            throw new TokenAlreadyExistsException("Token for user with email = " + refreshToken.getUser().getEmail() + " already exists");
         }
 
+        refreshToken.setId(0);
         refreshTokenRepository.save(refreshToken);
     }
 
     @Override
     public void update(RefreshToken refreshToken) {
-        if (!refreshTokenRepository.existsById(refreshToken.getId())) {
-            throw new TokenNotFoundException("Token not found");
+        if (!existsById(refreshToken.getId())) {
+            throw new TokenNotFoundException("Token with id = " + refreshToken.getId() + " not found");
         }
 
         refreshTokenRepository.save(refreshToken);

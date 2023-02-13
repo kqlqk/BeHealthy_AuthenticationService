@@ -1,6 +1,5 @@
 package me.kqlqk.behealthy.authentication_service.service;
 
-import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,7 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
-    void create(UserDTO userDTO);
+    void create(User user);
 
-    void update(UserDTO userDTO);
+    void update(User user);
 }

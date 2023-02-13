@@ -1,14 +1,18 @@
 package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
-import me.kqlqk.behealthy.authentication_service.dto.UserDTO;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
+import me.kqlqk.behealthy.authentication_service.dto.userDTO.CheckPasswordDTO;
+import me.kqlqk.behealthy.authentication_service.dto.userDTO.UpdateUserDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
+import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -24,20 +28,15 @@ public class UserRestController {
     }
 
     @GetMapping("/users/{id}")
-    public UserDTO getUserById(@PathVariable long id) {
-        if (!userService.existsById(id)) {
-            throw new UserNotFoundException("User with id = " + id + " not found");
-        }
-
-        return UserDTO.convertFromUserToUserDTO(userService.getById(id));
+    public User getUserById(@PathVariable long id) {
+        return userService.getById(id);
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserDTO userDTO) {
-        userDTO.setId(id);
-        userService.update(userDTO);
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody @Valid UpdateUserDTO updateUserDTO) {
+        userService.update(new User(id, updateUserDTO.getName(), updateUserDTO.getEmail(), updateUserDTO.getPassword()));
 
-        log.info("User with id = " + userDTO.getId() + " was updated");
+        log.info("User with id = " + id + " was updated");
 
         return ResponseEntity.ok().build();
     }
@@ -45,25 +44,21 @@ public class UserRestController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsersOrSpecified(@RequestParam(required = false) String email) {
         if (email == null) {
-            return ResponseEntity.ok(UserDTO.convertListOfUsersToListOfUserDTOs(userService.getAll()));
+            return ResponseEntity.ok(userService.getAll());
         }
 
-        if (!userService.existsByEmail(email)) {
-            throw new UserNotFoundException("User with email = " + email + " not found");
-        }
-
-        return ResponseEntity.ok(UserDTO.convertFromUserToUserDTO(userService.getByEmail(email)));
+        return ResponseEntity.ok(userService.getByEmail(email));
     }
 
     @PostMapping("/users/{id}/password/check")
-    public ValidateDTO checkUserPassword(@PathVariable long id, @RequestBody UserDTO userDTO) {
+    public ValidateDTO checkUserPassword(@PathVariable long id, @RequestBody @Valid CheckPasswordDTO checkPasswordDTO) {
         if (!userService.existsById(id)) {
             throw new UserNotFoundException("User with id = " + id + " not found");
         }
 
         ValidateDTO validateDTO = new ValidateDTO();
 
-        validateDTO.setValid(passwordEncoder.matches(userDTO.getPassword(), getUserById(id).getPassword()));
+        validateDTO.setValid(passwordEncoder.matches(checkPasswordDTO.getPassword(), getUserById(id).getPassword()));
 
         return validateDTO;
     }

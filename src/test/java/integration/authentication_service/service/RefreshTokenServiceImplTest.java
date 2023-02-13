@@ -2,7 +2,7 @@ package integration.authentication_service.service;
 
 import annotations.ServiceTest;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenAlreadyExistsException;
-import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
+import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.repository.RefreshTokenRepository;
@@ -26,14 +26,6 @@ public class RefreshTokenServiceImplTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    @Test
-    public void getByUserEmail_shouldReturnRefreshTokenOrNull() {
-        RefreshToken refreshToken = refreshTokenService.getByUserEmail("john@mail.com");
-
-        assertThat(refreshToken).isNotNull();
-
-        assertThrows(UserNotFoundException.class, () -> refreshTokenService.getByUserEmail("-"));
-    }
 
     @Test
     public void save_shouldSaveRefreshTokenToDB() {
@@ -48,27 +40,34 @@ public class RefreshTokenServiceImplTest {
 
         int newSize = refreshTokenRepository.findAll().size();
 
-        assertThat(newSize).isGreaterThan(size);
+        assertThat(newSize).isEqualTo(size + 1);
+    }
 
+    @Test
+    public void save_shouldThrowException() {
+        User user = userService.getById(1);
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken("randomToken1234");
+        refreshToken.setUser(user);
 
-        User user2 = userService.getById(1);
-        RefreshToken refreshToken2 = new RefreshToken();
-        refreshToken2.setToken("randomToken1234");
-        refreshToken2.setUser(user2);
-
-        assertThrows(TokenAlreadyExistsException.class, () -> refreshTokenService.save(refreshToken2));
+        assertThrows(TokenAlreadyExistsException.class, () -> refreshTokenService.save(refreshToken));
     }
 
     @Test
     public void update_shouldUpdateRefreshTokenInDB() {
-        RefreshToken refreshToken = refreshTokenService.getByUserEmail("john@mail.com");
-        String oldToken = refreshToken.getToken();
-
+        RefreshToken refreshToken = refreshTokenService.getByUserEmail("user1@mail.com");
         refreshToken.setToken("newToken123");
+
         refreshTokenService.update(refreshToken);
 
-        String newToken = refreshTokenService.getByUserEmail("john@mail.com").getToken();
+        assertThat(refreshTokenService.getByUserEmail("user1@mail.com").getToken()).isEqualTo(refreshToken.getToken());
+    }
 
-        assertThat(oldToken).isNotEqualTo(newToken);
+    @Test
+    public void update_shouldThrowException() {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setId(99);
+
+        assertThrows(TokenNotFoundException.class, () -> refreshTokenService.update(refreshToken));
     }
 }
