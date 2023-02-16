@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
 import me.kqlqk.behealthy.authentication_service.dto.userDTO.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.userDTO.RegistrationDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.UserDTO;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
 import org.junit.jupiter.api.Test;
@@ -67,12 +66,12 @@ public class AuthRestControllerTest {
 
 
         String invalidMail = "invalidMail@mail.com";
-        UserDTO invalidUserDTO2 = new UserDTO(invalidMail, "Test1234");
-        String invalidJson2 = objectMapper.writeValueAsString(invalidUserDTO2);
+        invalidLoginDTO = new LoginDTO(invalidMail, "Test1234");
+        invalidJson = objectMapper.writeValueAsString(invalidLoginDTO);
 
         mockMvc.perform(post("/api/v1/auth/login")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(invalidJson2))
+                                .content(invalidJson))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())

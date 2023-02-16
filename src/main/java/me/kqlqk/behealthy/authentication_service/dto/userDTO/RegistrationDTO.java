@@ -1,6 +1,5 @@
 package me.kqlqk.behealthy.authentication_service.dto.userDTO;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,6 @@ public class RegistrationDTO {
     @NotEmpty(message = "Name cannot be null")
     private String name;
 
-    @JsonView(UserDTO.WithoutPassword.class)
     @Pattern(regexp = "^[^\\s@]{3,}@[^\\s@]{2,}\\.[^\\s@]{2,}$", message = "Email should be valid")
     @NotEmpty(message = "Email cannot be null")
     private String email;
