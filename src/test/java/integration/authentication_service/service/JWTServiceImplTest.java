@@ -36,7 +36,7 @@ public class JWTServiceImplTest {
     @Test
     public void generateAndSaveOrUpdateRefreshToken_shouldSaveRefreshTokenToDb() {
         User user = new User("name", "email@mail.com", "Pswd1234");
-        userService.create(user);
+        userService.save(user);
 
         int size = refreshTokenRepository.findAll().size();
 

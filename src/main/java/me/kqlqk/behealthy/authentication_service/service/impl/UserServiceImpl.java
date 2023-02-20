@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void create(@NonNull User user) {
+    public void save(@NonNull User user) {
         if (existsByEmail(user.getEmail())) {
             throw new UserAlreadyExistsException("User with email = " + user.getEmail() + " already exists");
         }

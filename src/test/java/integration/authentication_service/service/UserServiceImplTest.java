@@ -21,10 +21,10 @@ public class UserServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    public void create_shouldCreateUserAndAddToDb() {
+    public void save_shouldCreateUserAndAddToDb() {
         int size = userService.getAll().size();
 
-        userService.create(new User("steve", "steve@mail.com", "Password12345"));
+        userService.save(new User("steve", "steve@mail.com", "Password12345"));
 
         int newSize = userService.getAll().size();
 
@@ -32,8 +32,8 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void create_shouldThrowException() {
-        assertThrows(UserAlreadyExistsException.class, () -> userService.create(new User("name", "user1@mail.com", "Pswd1234")));
+    public void save_shouldThrowException() {
+        assertThrows(UserAlreadyExistsException.class, () -> userService.save(new User("name", "user1@mail.com", "Pswd1234")));
     }
 
     @Test

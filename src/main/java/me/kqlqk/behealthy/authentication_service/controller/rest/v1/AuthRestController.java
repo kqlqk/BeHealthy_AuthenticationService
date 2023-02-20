@@ -56,7 +56,7 @@ public class AuthRestController {
 
     @PostMapping("/registration")
     public TokensDTO registration(@RequestBody @Valid RegistrationDTO registrationDTO) {
-        userService.create(new User(registrationDTO.getName(), registrationDTO.getEmail(), registrationDTO.getPassword()));
+        userService.save(new User(registrationDTO.getName(), registrationDTO.getEmail(), registrationDTO.getPassword()));
 
         String accessToken = jwtService.generateAccessToken(registrationDTO.getEmail());
         String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken(registrationDTO.getEmail());
