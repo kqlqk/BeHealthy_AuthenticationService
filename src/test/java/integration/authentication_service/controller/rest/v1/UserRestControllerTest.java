@@ -2,8 +2,8 @@ package integration.authentication_service.controller.rest.v1;
 
 import annotations.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.CheckPasswordDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.UpdateUserDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.CheckPasswordDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.UpdateUserDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -162,12 +162,7 @@ public class UserRestControllerTest {
     }
 
     @Test
-    public void getAllUsersOrSpecified_shouldReturnAllUsersOrSpecified() throws Exception {
-        mockMvc.perform(get("/api/v1/users")
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.size()", is(2)));
+    public void getUserByEmail_shouldReturnUserByEmail() throws Exception {
 
         mockMvc.perform(get("/api/v1/users")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,11 +170,13 @@ public class UserRestControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").exists());
+                .andExpect(jsonPath("$.name").exists())
+                .andExpect(jsonPath("$.email").exists())
+                .andExpect(jsonPath("$.password").exists());
     }
 
     @Test
-    public void getAllUsersOrSpecified_shouldReturnJsonWithException() throws Exception {
+    public void getUserByEmail_shouldReturnJsonWithException() throws Exception {
         mockMvc.perform(get("/api/v1/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .param("email", "random"))

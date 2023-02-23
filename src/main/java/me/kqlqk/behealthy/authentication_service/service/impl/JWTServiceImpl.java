@@ -5,7 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.NonNull;
-import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
+import me.kqlqk.behealthy.authentication_service.dto.token_dto.TokensDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.TokenException;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.RefreshToken;

@@ -2,9 +2,9 @@ package integration.authentication_service.controller.rest.v1;
 
 import annotations.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.LoginDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.RegistrationDTO;
+import me.kqlqk.behealthy.authentication_service.dto.token_dto.RefreshTokenDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.LoginDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.RegistrationDTO;
 import me.kqlqk.behealthy.authentication_service.repository.UserRepository;
 import me.kqlqk.behealthy.authentication_service.service.JWTService;
 import org.junit.jupiter.api.Test;
@@ -188,15 +188,13 @@ public class AuthRestControllerTest {
 
     @Test
     public void getNewAccessToken_shouldReturnNewAccessToken() throws Exception {
-        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com");
-
-        TokensDTO validTokensDTO = new TokensDTO(null, refreshToken);
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO(jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com"));
         ObjectMapper objectMapper = new ObjectMapper();
-        String validJson = objectMapper.writeValueAsString(validTokensDTO);
+        String json = objectMapper.writeValueAsString(refreshTokenDTO);
 
         mockMvc.perform(post("/api/v1/auth/access")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(validJson))
+                                .content(json))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists())
@@ -205,13 +203,13 @@ public class AuthRestControllerTest {
 
     @Test
     public void getNewAccessToken_shouldReturnJsonWithException() throws Exception {
-        TokensDTO invalidTokensDTO = new TokensDTO(null, "randomToken");
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO("randomToken");
         ObjectMapper objectMapper = new ObjectMapper();
-        String invalidJson = objectMapper.writeValueAsString(invalidTokensDTO);
+        String json = objectMapper.writeValueAsString(refreshTokenDTO);
 
         mockMvc.perform(post("/api/v1/auth/access")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(invalidJson))
+                                .content(json))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())
@@ -221,15 +219,13 @@ public class AuthRestControllerTest {
 
     @Test
     public void updateTokens_shouldUpdateTokens() throws Exception {
-        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com");
-
-        TokensDTO validTokensDTO = new TokensDTO(null, refreshToken);
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO(jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com"));
         ObjectMapper objectMapper = new ObjectMapper();
-        String validJson = objectMapper.writeValueAsString(validTokensDTO);
+        String json = objectMapper.writeValueAsString(refreshTokenDTO);
 
         mockMvc.perform(post("/api/v1/auth/update")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(validJson))
+                                .content(json))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists())
@@ -239,13 +235,13 @@ public class AuthRestControllerTest {
 
     @Test
     public void updateTokens_shouldReturnJsonWithException() throws Exception {
-        TokensDTO invalidTokensDTO = new TokensDTO(null, "randomToken");
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO("randomToken");
         ObjectMapper objectMapper = new ObjectMapper();
-        String invalidJson = objectMapper.writeValueAsString(invalidTokensDTO);
+        String json = objectMapper.writeValueAsString(refreshTokenDTO);
 
         mockMvc.perform(post("/api/v1/auth/update")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(invalidJson))
+                                .content(json))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").exists())

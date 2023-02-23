@@ -2,8 +2,9 @@ package me.kqlqk.behealthy.authentication_service.controller.rest.v1;
 
 import lombok.extern.slf4j.Slf4j;
 import me.kqlqk.behealthy.authentication_service.dto.ValidateDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.CheckPasswordDTO;
-import me.kqlqk.behealthy.authentication_service.dto.userDTO.UpdateUserDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.CheckPasswordDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.GetUserDTO;
+import me.kqlqk.behealthy.authentication_service.dto.user_dto.UpdateUserDTO;
 import me.kqlqk.behealthy.authentication_service.exception.exceptions.UserNotFoundException;
 import me.kqlqk.behealthy.authentication_service.model.User;
 import me.kqlqk.behealthy.authentication_service.service.UserService;
@@ -28,8 +29,8 @@ public class UserRestController {
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable long id) {
-        return userService.getById(id);
+    public GetUserDTO getUserById(@PathVariable long id) {
+        return GetUserDTO.convert(userService.getById(id));
     }
 
     @PutMapping("/users/{id}")
@@ -42,12 +43,8 @@ public class UserRestController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<?> getAllUsersOrSpecified(@RequestParam(required = false) String email) {
-        if (email == null) {
-            return ResponseEntity.ok(userService.getAll());
-        }
-
-        return ResponseEntity.ok(userService.getByEmail(email));
+    public GetUserDTO getUserByEmail(@RequestParam String email) {
+        return GetUserDTO.convert(userService.getByEmail(email));
     }
 
     @PostMapping("/users/{id}/password/check")
@@ -58,7 +55,7 @@ public class UserRestController {
 
         ValidateDTO validateDTO = new ValidateDTO();
 
-        validateDTO.setValid(passwordEncoder.matches(checkPasswordDTO.getPassword(), getUserById(id).getPassword()));
+        validateDTO.setValid(passwordEncoder.matches(checkPasswordDTO.getPassword(), userService.getById(id).getPassword()));
 
         return validateDTO;
     }

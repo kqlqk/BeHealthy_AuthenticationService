@@ -1,4 +1,4 @@
-package me.kqlqk.behealthy.authentication_service.dto.userDTO;
+package me.kqlqk.behealthy.authentication_service.dto.user_dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

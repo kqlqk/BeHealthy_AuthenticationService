@@ -1,4 +1,4 @@
-package me.kqlqk.behealthy.authentication_service.dto.userDTO;
+package me.kqlqk.behealthy.authentication_service.dto.user_dto;
 
 import lombok.Data;
 
@@ -8,8 +8,6 @@ import javax.validation.constraints.Size;
 
 @Data
 public class UpdateUserDTO {
-    private long id;
-
     @Pattern(regexp = "[a-zA-Z]+", message = "Name should contains only letters")
     @Size(min = 2, max = 20, message = "Name should be between 2 and 20 characters")
     @NotEmpty(message = "Name cannot be null")

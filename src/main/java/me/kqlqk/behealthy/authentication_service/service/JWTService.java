@@ -1,7 +1,7 @@
 package me.kqlqk.behealthy.authentication_service.service;
 
 import io.jsonwebtoken.Claims;
-import me.kqlqk.behealthy.authentication_service.dto.TokensDTO;
+import me.kqlqk.behealthy.authentication_service.dto.token_dto.TokensDTO;
 import org.springframework.stereotype.Service;
 
 @Service
