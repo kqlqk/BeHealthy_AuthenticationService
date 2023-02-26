@@ -102,6 +102,14 @@ public class AuthRestController {
         return validateDTO;
     }
 
+    @PostMapping("/refresh/validate")
+    public ValidateDTO validateRefreshToken(@RequestBody RefreshTokenDTO refreshTokenDTO) {
+        ValidateDTO validateDTO = new ValidateDTO();
+        validateDTO.setValid(jwtService.validateRefreshToken(refreshTokenDTO.getRefreshToken()));
+
+        return validateDTO;
+    }
+
     @PostMapping("/access/email")
     public Map<String, String> getEmailFromAccessToken(@RequestBody AccessTokenDTO accessTokenDTO) {
         Map<String, String> res = new HashMap<>();

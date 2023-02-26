@@ -2,6 +2,7 @@ package integration.authentication_service.controller.rest.v1;
 
 import annotations.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.kqlqk.behealthy.authentication_service.dto.token_dto.AccessTokenDTO;
 import me.kqlqk.behealthy.authentication_service.dto.token_dto.RefreshTokenDTO;
 import me.kqlqk.behealthy.authentication_service.dto.user_dto.LoginDTO;
 import me.kqlqk.behealthy.authentication_service.dto.user_dto.RegistrationDTO;
@@ -199,6 +200,37 @@ public class AuthRestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.accessToken").exists());
+    }
+
+    @Test
+    public void validateAccessTokenShouldValidateAccessToken() throws Exception {
+        String refreshToken = jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com");
+        AccessTokenDTO accessTokenDTO = new AccessTokenDTO(jwtService.getNewAccessToken(refreshToken));
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(accessTokenDTO);
+
+        mockMvc.perform(post("/api/v1/auth/access/validate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.valid").exists());
+    }
+
+    @Test
+    public void validateRefreshTokenShouldValidateRefreshToken() throws Exception {
+        RefreshTokenDTO refreshTokenDTO = new RefreshTokenDTO(jwtService.generateAndSaveOrUpdateRefreshToken("user1@mail.com"));
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(refreshTokenDTO);
+
+        mockMvc.perform(post("/api/v1/auth/refresh/validate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.valid").exists());
     }
 
     @Test

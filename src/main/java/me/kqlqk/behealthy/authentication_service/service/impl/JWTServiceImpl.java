@@ -149,7 +149,7 @@ public class JWTServiceImpl implements JWTService {
             throw new TokenException("Token unsupported");
         }
         catch (MalformedJwtException mjEx) {
-            throw new TokenException("Token Malformed");
+            throw new TokenException("Token malformed");
         }
         catch (SignatureException sEx) {
             throw new TokenException("Signature invalid");
