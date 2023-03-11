@@ -25,13 +25,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public RefreshToken getByUserEmail(@NonNull String email) {
-        if (!existsByUserEmail(email)) {
-            throw new TokenNotFoundException("Token for user with email = " + email + " not found");
-        }
-
         User user = userService.getByEmail(email);
 
-        return refreshTokenRepository.findByUser(user);
+        return refreshTokenRepository.findByUser(user)
+                .orElseThrow(() -> new TokenNotFoundException("Token for user with email = " + email + " not found"));
     }
 
     @Override
